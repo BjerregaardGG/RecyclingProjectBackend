@@ -3,40 +3,60 @@ package com.recyclingprojectbackend.auth.service;
 import com.recyclingprojectbackend.auth.dto.AuthResponseDto;
 import com.recyclingprojectbackend.auth.dto.LoginRequestDto;
 import com.recyclingprojectbackend.auth.dto.RegisterRequestDto;
+import com.recyclingprojectbackend.auth.utility.JwtUtility;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
+    private final JwtUtility jwtUtility;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserRepository userRepository) {
+    public AuthServiceImpl(UserRepository userRepository, JwtUtility jwtUtility, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.jwtUtility = jwtUtility;
+        this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public AuthResponseDto login(LoginRequestDto request) {
-        User user = userRepository.findByEmail(request.getEmail());
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
 
-        if (user == null || !user.getPassword().equals(request.getPassword())) {
-            throw new UsernameNotFoundException("Invalid username or password");
+        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found");
         }
-        return new AuthResponseDto("JWT", user.getEmail(), user.getId());
+
+        String token = jwtUtility.generateToken(user.getId());
+        return new AuthResponseDto(token, user.getEmail(), user.getId());
     }
 
     @Override
-    public AuthResponseDto register(RegisterRequestDto request) {
+    public void register(RegisterRequestDto request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new IllegalStateException("User already exists");
+        }
+
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
         User newUser = new User();
         newUser.setEmail(request.getEmail());
-        newUser.setPassword(request.getPassword());
+        newUser.setPassword(hashedPassword);
 
-        if (userRepository.findByEmail(request.getEmail()) == null) {
-            throw new RuntimeException("User with email " + request.getEmail() + " already exists");
-        }
-        User createdUser = userRepository.save(newUser);
-        return new AuthResponseDto("JWT", createdUser.getEmail(), createdUser.getId());
+        userRepository.save(newUser);
     }
+
 }

@@ -1,7 +1,10 @@
 package com.recyclingprojectbackend.user.service;
 
+import com.recyclingprojectbackend.user.dto.UserDto;
+import com.recyclingprojectbackend.user.dto.UserDtoMapper;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,19 +13,26 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserDtoMapper userDtoMapper;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, UserDtoMapper userDtoMapper) {
         this.userRepository = userRepository;
+        this.userDtoMapper = userDtoMapper;
     }
 
     @Override
-    public List<User> findAllUsers() {
-        return userRepository.findAll();
+    public List<UserDto> findAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(u -> userDtoMapper.userToUserDto(u))
+                .toList();
     }
 
     @Override
-    public User findUserById(long id) {
-        return userRepository.findById(id).orElse(null);
-    }
+    public UserDto findUserById(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
+        return userDtoMapper.userToUserDto(user);
+    }
 }
