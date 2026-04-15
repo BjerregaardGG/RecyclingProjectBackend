@@ -1,5 +1,6 @@
 package com.recyclingprojectbackend.user.controller;
 
+import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,17 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsers() {
+    public List<UserDto> getUsers() {
         return userService.findAllUsers();
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable Long id) {
+    public UserDto getUser(@PathVariable Long id) {
         return userService.findUserById(id);
+    }
+
+    @GetMapping("/test")
+    public String test() {
+        return "test";
     }
 }
