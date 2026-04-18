@@ -4,6 +4,7 @@ import com.recyclingprojectbackend.auth.dto.AuthResponseDto;
 import com.recyclingprojectbackend.auth.dto.LoginRequestDto;
 import com.recyclingprojectbackend.auth.dto.RegisterRequestDto;
 import com.recyclingprojectbackend.auth.utility.JwtUtility;
+import com.recyclingprojectbackend.auth.utility.AuthUtility;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,16 +20,22 @@ public class AuthServiceImpl implements AuthService {
     private final JwtUtility jwtUtility;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
+    private final AuthUtility authUtility;
 
-    public AuthServiceImpl(UserRepository userRepository, JwtUtility jwtUtility, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserRepository userRepository, JwtUtility jwtUtility, AuthenticationManager authenticationManager, PasswordEncoder passwordEncoder, AuthUtility authUtility) {
         this.userRepository = userRepository;
         this.jwtUtility = jwtUtility;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
+        this.authUtility = authUtility;
     }
 
     @Override
     public AuthResponseDto login(LoginRequestDto request) {
+        if (!authUtility.checkPassword(request.getPassword())) {
+            throw new RuntimeException("Password does not meet the requirements");
+        }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -47,6 +54,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequestDto request) {
+        if (!authUtility.checkPassword(request.getPassword())) {
+            throw new RuntimeException("Password does not meet the requirements");
+        }
+        if (!authUtility.checkEmail(request.getEmail())) {
+            throw new RuntimeException("Email does not meet the requirements");
+        }
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalStateException("User already exists");
         }

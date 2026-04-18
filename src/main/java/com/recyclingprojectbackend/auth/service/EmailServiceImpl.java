@@ -20,7 +20,7 @@ public class EmailServiceImpl implements EmailService {
         mailMessage.setTo(email);
         mailMessage.setSubject("Wastey - nulstil dit password");
         mailMessage.setText("Klik på linket for at nulstille dit password:\n\n"
-                + "http://localhost:8080/api/auth/reset-password?token=" + resetToken
+                + "recyclingprojectfrontend://auth/reset-password?token=" + resetToken
                 + "\n\nLinket udløber om 15 minutter.");
         javaMailSender.send(mailMessage);
     }

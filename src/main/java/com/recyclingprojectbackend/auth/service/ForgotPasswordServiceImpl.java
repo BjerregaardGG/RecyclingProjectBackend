@@ -4,6 +4,7 @@ import com.recyclingprojectbackend.auth.model.PasswordResetToken;
 import com.recyclingprojectbackend.auth.repository.PasswordResetTokenRepository;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,15 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EntityManager entityManager;
 
     public ForgotPasswordServiceImpl(EmailService emailService, PasswordResetTokenRepository passwordResetTokenRepository,
-                                     UserRepository userRepository, PasswordEncoder passwordEncoder, PasswordEncoder passwordEncoder1) {
+                                     UserRepository userRepository, PasswordEncoder passwordEncoder, EntityManager entityManager) {
         this.emailService = emailService;
         this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.entityManager = entityManager;
     }
 
 
@@ -36,6 +39,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
 
         // 1. Delete old token
         passwordResetTokenRepository.deleteByEmail(email);
+
+        // Delete before insert
+        entityManager.flush();
 
         // 2. Create new token
         PasswordResetToken passwordResetToken = new PasswordResetToken();
