@@ -68,6 +68,7 @@ public class AuthServiceImpl implements AuthService {
         String hashedPassword = passwordEncoder.encode(request.getPassword());
         User newUser = new User();
         newUser.setEmail(request.getEmail());
+        newUser.setName(request.getName());
         newUser.setPassword(hashedPassword);
 
         userRepository.save(newUser);

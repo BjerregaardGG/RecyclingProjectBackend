@@ -7,15 +7,17 @@ public class ItemDto {
     private long id;
     private String name;
     private String description;
+    private String secondDescription;
     private String image;
     private String category;
 
-    public ItemDto(long id, String name, String description, String image, String category) {
+    public ItemDto(long id, String name, String description, String secondDescription, String image, String category) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;
         this.category = category;
+        this.secondDescription = secondDescription;
     }
 
     public long getId() {
@@ -56,5 +58,13 @@ public class ItemDto {
 
     public void setCategory(String category) {
         this.category = category;
+    }
+
+    public String getSecondDescription() {
+        return secondDescription;
+    }
+
+    public void setSecondDescription(String secondDescription) {
+        this.secondDescription = secondDescription;
     }
 }

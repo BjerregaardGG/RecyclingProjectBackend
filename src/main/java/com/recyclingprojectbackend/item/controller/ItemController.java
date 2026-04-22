@@ -27,7 +27,7 @@ public class ItemController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<List<ItemDto>> getItemsByCategory(@RequestParam Category category) {
+    public ResponseEntity<List<ItemDto>> getItemsByCategory(@RequestParam String category) {
         return ResponseEntity.ok(itemService.getItemsByCategory(category));
     }
 

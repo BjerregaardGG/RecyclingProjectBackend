@@ -11,8 +11,8 @@ import java.util.List;
 
 
 public interface ItemService {
-    public List<ItemDto> getItems();
-    public List<ItemDto> getItemsByCategory(Category category);
-    public ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
+    List<ItemDto> getItems();
+    List<ItemDto> getItemsByCategory(String category);
+    ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
 
 }

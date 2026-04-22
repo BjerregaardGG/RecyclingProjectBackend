@@ -18,18 +18,22 @@ public class Item {
     private String description;
 
     @Column(unique = false, nullable = true)
+    private String secondTitle;
+
+    @Column(unique = false, nullable = false)
     private String image;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public Item(long id, String name, String description, String image, Category category) {
+    public Item(long id, String name, String description, String secondTitle, String image, Category category) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;
         this.category = category;
+        this.secondTitle = secondTitle;
     }
 
     public Item() {}
@@ -72,5 +76,13 @@ public class Item {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public String getSecondTitle() {
+        return secondTitle;
+    }
+
+    public void setSecondTitle(String secondTitle) {
+        this.secondTitle = secondTitle;
     }
 }

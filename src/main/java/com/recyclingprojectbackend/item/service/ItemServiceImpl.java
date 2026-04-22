@@ -34,8 +34,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItemsByCategory(Category category) {
-        return itemRepository.findByCategory(category)
+    public List<ItemDto> getItemsByCategory(String category) {
+        return itemRepository.findByCategory_CategoryName(category)
                 .stream()
                 .map(item -> itemDtoMapper.itemToItemDto(item))
                 .toList();
@@ -50,6 +50,8 @@ public class ItemServiceImpl implements ItemService {
         newItem.setCategory(category);
         newItem.setName(itemRequestDto.getName());
         newItem.setDescription(itemRequestDto.getDescription());
+        newItem.setSecondTitle(itemRequestDto.getSecondTitle());
+        newItem.setImage(itemRequestDto.getImage());
 
         return itemDtoMapper.itemToItemDto(itemRepository.save(newItem));
     }
