@@ -7,6 +7,10 @@ import com.recyclingprojectbackend.item.dto.ItemDtoMapper;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
+import com.recyclingprojectbackend.user.dto.UserDto;
+import com.recyclingprojectbackend.user.model.User;
+import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +22,13 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final ItemDtoMapper itemDtoMapper;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemDtoMapper itemDtoMapper,  CategoryRepository categoryRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemDtoMapper itemDtoMapper, CategoryRepository categoryRepository, UserRepository userRepository) {
         this.itemRepository = itemRepository;
         this.itemDtoMapper = itemDtoMapper;
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -31,6 +37,14 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(item -> itemDtoMapper.itemToItemDto(item))
                 .toList();
+    }
+
+    @Override
+    public ItemDto getItemById(long id) {
+        Item item = itemRepository.findById(id).
+                orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
+
+        return itemDtoMapper.itemToItemDto(item);
     }
 
     @Override
@@ -46,12 +60,23 @@ public class ItemServiceImpl implements ItemService {
         Category category = categoryRepository.findById(itemRequestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
+        UserDto userDto = (UserDto) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal();
+
+        User user = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Item newItem = new Item();
         newItem.setCategory(category);
         newItem.setName(itemRequestDto.getName());
         newItem.setDescription(itemRequestDto.getDescription());
         newItem.setSecondTitle(itemRequestDto.getSecondTitle());
         newItem.setImage(itemRequestDto.getImage());
+        newItem.setCity(itemRequestDto.getCity());
+        newItem.setAddress(itemRequestDto.getAddress());
+        newItem.setLatitude(itemRequestDto.getLatitude());
+        newItem.setLongitude(itemRequestDto.getLongitude());
+        newItem.setUser(user);
 
         return itemDtoMapper.itemToItemDto(itemRepository.save(newItem));
     }

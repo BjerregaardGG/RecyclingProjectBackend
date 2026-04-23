@@ -26,6 +26,11 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getItems());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ItemDto> getItemById(@PathVariable long id) {
+        return ResponseEntity.ok(itemService.getItemById(id));
+    }
+
     @GetMapping("/category")
     public ResponseEntity<List<ItemDto>> getItemsByCategory(@RequestParam String category) {
         return ResponseEntity.ok(itemService.getItemsByCategory(category));

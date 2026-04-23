@@ -4,11 +4,15 @@ public class RegisterRequestDto {
     private String email;
     private String name;
     private String password;
+    private String city;
+    private String postalCode;
 
-    public RegisterRequestDto(String email, String name, String password) {
+    public RegisterRequestDto(String email, String name, String password, String city, String postalCode) {
         this.email = email;
         this.name = name;
         this.password = password;
+        this.city = city;
+        this.postalCode = postalCode;
     }
 
     public String getEmail() {
@@ -33,5 +37,21 @@ public class RegisterRequestDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
     }
 }

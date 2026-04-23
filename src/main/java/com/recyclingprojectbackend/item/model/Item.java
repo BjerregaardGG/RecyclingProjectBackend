@@ -1,6 +1,7 @@
 package com.recyclingprojectbackend.item.model;
 
 import com.recyclingprojectbackend.category.model.Category;
+import com.recyclingprojectbackend.user.model.User;
 import jakarta.persistence.*;
 
 @Entity
@@ -27,13 +28,31 @@ public class Item {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    public Item(long id, String name, String description, String secondTitle, String image, Category category) {
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(nullable = false)
+    private String address;
+    @Column(nullable = false)
+    private String city;
+    @Column(nullable = false)
+    private Double latitude;
+    @Column(nullable = false)
+    private Double longitude;
+
+    public Item(long id, String name, String description, String secondTitle, String image, Category category, User user, String address, String city, Double latitude, Double longitude) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.image = image;
         this.category = category;
         this.secondTitle = secondTitle;
+        this.user = user;
+        this.address = address;
+        this.city = city;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public Item() {}
@@ -84,5 +103,45 @@ public class Item {
 
     public void setSecondTitle(String secondTitle) {
         this.secondTitle = secondTitle;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
     }
 }

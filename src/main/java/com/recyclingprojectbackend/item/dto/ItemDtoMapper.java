@@ -13,7 +13,10 @@ public class ItemDtoMapper {
                 item.getDescription(),
                 item.getSecondTitle(),
                 item.getImage(),
-                item.getCategory().getCategoryName()
+                item.getCategory().getCategoryName(),
+                item.getUser().getId(),
+                item.getLatitude(),
+                item.getLongitude()
         );
     }
 }
