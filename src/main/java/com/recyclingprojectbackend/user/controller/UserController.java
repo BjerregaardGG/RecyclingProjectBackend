@@ -4,6 +4,9 @@ import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,17 +23,17 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getUsers() {
-        return userService.findAllUsers();
+    public ResponseEntity<List<UserDto>> getUsers() {
+        return ResponseEntity.ok(userService.findAllUsers());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDto> getLoggedInUser() {
+        return ResponseEntity.ok(userService.findLoggedInUser());
     }
 
     @GetMapping("/{id}")
-    public UserDto getUser(@PathVariable Long id) {
-        return userService.findUserById(id);
-    }
-
-    @GetMapping("/test")
-    public String test() {
-        return "test";
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findUserById(id));
     }
 }

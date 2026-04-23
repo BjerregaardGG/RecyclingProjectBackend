@@ -70,6 +70,8 @@ public class AuthServiceImpl implements AuthService {
         newUser.setEmail(request.getEmail());
         newUser.setName(request.getName());
         newUser.setPassword(hashedPassword);
+        newUser.setCity(request.getCity());
+        newUser.setPostalCode(request.getPostalCode());
 
         userRepository.save(newUser);
     }

@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface ItemService {
     List<ItemDto> getItems();
+    ItemDto getItemById(long id);
     List<ItemDto> getItemsByCategory(String category);
     ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
 

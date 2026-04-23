@@ -8,5 +8,5 @@ import java.util.List;
 public interface UserService {
     List<UserDto> findAllUsers();
     UserDto findUserById(long id);
-
+    UserDto findLoggedInUser();
 }
