@@ -1,12 +1,8 @@
 package com.recyclingprojectbackend.user.controller;
 
 import com.recyclingprojectbackend.user.dto.UserDto;
-import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +30,11 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.findUserById(id));
+        return ResponseEntity.ok(userService.findPublicUserById(id));
+    }
+
+    @PatchMapping("/me/image")
+    public ResponseEntity<String> uploadPicture(@RequestParam String image) {
+        return ResponseEntity.ok(userService.uploadPicture(image));
     }
 }
