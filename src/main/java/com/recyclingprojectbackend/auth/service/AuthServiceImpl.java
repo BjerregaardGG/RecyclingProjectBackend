@@ -32,18 +32,18 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto login(LoginRequestDto request) {
-        if (!authUtility.checkPassword(request.getPassword())) {
+        if (!authUtility.checkPassword(request.password())) {
             throw new RuntimeException("Password does not meet the requirements");
         }
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
+                        request.email(),
+                        request.password()
                 )
         );
 
-        User user = userRepository.findByEmail(request.getEmail()).orElse(null);
+        User user = userRepository.findByEmail(request.email()).orElse(null);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
@@ -54,24 +54,24 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequestDto request) {
-        if (!authUtility.checkPassword(request.getPassword())) {
+        if (!authUtility.checkPassword(request.password())) {
             throw new RuntimeException("Password does not meet the requirements");
         }
-        if (!authUtility.checkEmail(request.getEmail())) {
+        if (!authUtility.checkEmail(request.email())) {
             throw new RuntimeException("Email does not meet the requirements");
         }
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.email()).isPresent()) {
             throw new IllegalStateException("User already exists");
         }
 
-        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        String hashedPassword = passwordEncoder.encode(request.password());
         User newUser = new User();
-        newUser.setEmail(request.getEmail());
-        newUser.setName(request.getName());
+        newUser.setEmail(request.email());
+        newUser.setName(request.name());
         newUser.setPassword(hashedPassword);
-        newUser.setCity(request.getCity());
-        newUser.setPostalCode(request.getPostalCode());
+        newUser.setCity(request.city());
+        newUser.setPostalCode(request.postalCode());
 
         userRepository.save(newUser);
     }

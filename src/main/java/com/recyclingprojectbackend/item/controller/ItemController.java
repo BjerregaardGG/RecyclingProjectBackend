@@ -5,6 +5,7 @@ import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.service.ItemService;
+import com.recyclingprojectbackend.user.dto.UserDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,11 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItems() {
         return ResponseEntity.ok(itemService.getItems());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<ItemDto>> getLoggedInUserItems() {
+        return ResponseEntity.ok(itemService.getLoggedInUserItems());
     }
 
     @GetMapping("/{id}")

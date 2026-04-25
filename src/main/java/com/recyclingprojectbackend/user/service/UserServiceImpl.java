@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -31,6 +32,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDto findPublicUserById(long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+        return userDtoMapper.userToUserDto(user);
+    }
+
+    @Override
     public UserDto findUserById(long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
@@ -47,5 +56,23 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Authentication object is null");
         }
         return (UserDto) authentication.getPrincipal();
+    }
+
+    @Override
+    public String uploadPicture(String image) {
+
+        UserDto userDto = (UserDto) Objects.requireNonNull(SecurityContextHolder.getContext()
+                .getAuthentication()).getPrincipal();
+
+        if (userDto == null) {
+            throw new UsernameNotFoundException("User not found");
+        }
+
+        User user = userRepository.findById(userDto.id())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userDto.id()));
+
+        user.setImage(image);
+        userRepository.save(user);
+        return image;
     }
 }
