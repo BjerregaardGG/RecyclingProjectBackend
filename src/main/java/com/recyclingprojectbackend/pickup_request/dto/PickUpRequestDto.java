@@ -16,5 +16,5 @@ public record PickUpRequestDto(
     PickupStatus status,
     LocalDateTime createdAt,
     LocalDateTime expiresAt,
-    String pickupAddress  // null indtil ACCEPTED
+    String pickupAddress
 ){}
