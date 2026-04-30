@@ -31,10 +31,34 @@ public class PickupServiceImpl implements PickupService {
     }
 
     @Override
-    public List<PickUpRequestDto> findMyIncomingPickupRequests(long owner_id, PickupStatus status) {
-        return pickupRepository.findByOwner_IdAndStatus(owner_id, PickupStatus.PENDING)
+    public PickUpRequestDto GetPickUpRequestById(Long id) {
+        PickupRequest pickUp = pickupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pickup not found with id: " + id));
+
+        return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickUp);
+    }
+
+    @Override
+    public List<PickUpRequestDto> findMyIncomingPickupRequests(long owner_id) {
+        return pickupRepository.findByOwner_IdAndStatusIn(owner_id, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED))
                 .stream()
-                .map(pickupRequest -> pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRequest))
+                .map(pickupRequestDtoMapper::pickupRequestToPickupRequestDto)
+                .toList();
+    }
+
+    @Override
+    public List<PickUpRequestDto> findMyOutgoingPickupRequests(long ownerId) {
+        return pickupRepository.findByRequester_IdAndStatusIn(ownerId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED))
+                .stream()
+                .map(pickupRequestDtoMapper::pickupRequestToPickupRequestDto)
+                .toList();
+    }
+
+    @Override
+    public List<PickUpRequestDto> findAcceptedPickupRequests(long owner_id, PickupStatus status) {
+        return pickupRepository.findByOwner_IdAndStatusIn(owner_id, List.of(PickupStatus.ACCEPTED))
+                .stream()
+                .map(pickupRequestDtoMapper::pickupRequestToPickupRequestDto)
                 .toList();
     }
 

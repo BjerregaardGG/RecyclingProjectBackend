@@ -9,8 +9,10 @@ import java.util.List;
 
 
 public interface PickupService {
-    // Gets the pickupRequests on the Owner side
-    List<PickUpRequestDto> findMyIncomingPickupRequests(long ownerId, PickupStatus status);
+    PickUpRequestDto GetPickUpRequestById(Long id);
+    List<PickUpRequestDto> findMyIncomingPickupRequests(long ownerId);
+    List<PickUpRequestDto> findMyOutgoingPickupRequests(long ownerId);
+    List<PickUpRequestDto> findAcceptedPickupRequests(long owner_id, PickupStatus status);
     PickUpRequestDto acceptRequest(long requestId, long ownerId);
     PickUpRequestDto declineRequest(long requestId, long ownerId);
     PickUpRequestDto createPickupRequest(Long itemId, long requesterId);
