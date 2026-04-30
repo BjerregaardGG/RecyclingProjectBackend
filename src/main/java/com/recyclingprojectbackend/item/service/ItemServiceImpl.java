@@ -35,7 +35,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItems() {
-        return itemRepository.findAll()
+        return itemRepository.findAllAvailable()
                 .stream()
                 .map(item -> itemDtoMapper.itemToItemDto(item))
                 .toList();
@@ -67,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> getItemsByCategory(String category) {
-        return itemRepository.findByCategory_CategoryName(category)
+        return itemRepository.findAvailableByCategory(category)
                 .stream()
                 .map(item -> itemDtoMapper.itemToItemDto(item))
                 .toList();

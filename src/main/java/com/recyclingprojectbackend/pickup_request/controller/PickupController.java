@@ -4,6 +4,7 @@ import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
 import com.recyclingprojectbackend.pickup_request.service.PickupService;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.user.dto.UserDto;
+import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,24 @@ public class PickupController {
         this.pickupService = pickupService;
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PickUpRequestDto> getPickUpRequestById(@PathVariable Long id) {
+        return ResponseEntity.ok(pickupService.GetPickUpRequestById(id));
+    }
+
     @GetMapping("/incoming")
     public ResponseEntity<List<PickUpRequestDto>> getIncomingPickupRequests(@AuthenticationPrincipal UserDto user){
-        return ResponseEntity.ok(pickupService.findMyIncomingPickupRequests(user.id(), PickupStatus.PENDING));
+        return ResponseEntity.ok(pickupService.findMyIncomingPickupRequests(user.id()));
+    }
+
+    @GetMapping("/outgoing")
+    public ResponseEntity<List<PickUpRequestDto>> getOutgoingPickupRequests(@AuthenticationPrincipal UserDto user){
+        return ResponseEntity.ok(pickupService.findMyOutgoingPickupRequests(user.id()));
+    }
+
+    @GetMapping("/accepted")
+    public ResponseEntity<List<PickUpRequestDto>> getAcceptedPickupRequests(@AuthenticationPrincipal UserDto user){
+        return ResponseEntity.ok(pickupService.findAcceptedPickupRequests(user.id(), PickupStatus.ACCEPTED));
     }
 
     @PatchMapping("/{requestId}/accept")
