@@ -37,6 +37,8 @@ public class PickupRequest {
     private LocalDateTime acceptedAt;
     private LocalDateTime expiresAt;
     private LocalDateTime completedAt;
+    private LocalDateTime ownerConfirmedAt;
+    private LocalDateTime requesterConfirmedAt;
 
     @PrePersist
     public void prePersist() {
@@ -57,6 +59,10 @@ public class PickupRequest {
     }
 
     public PickupRequest() {}
+
+    public boolean isFullyConfirmed() {
+        return ownerConfirmedAt != null && requesterConfirmedAt != null;
+    }
 
     public long getId() {
         return id;
@@ -128,5 +134,21 @@ public class PickupRequest {
 
     public void setCompletedAt(LocalDateTime completedAt) {
         this.completedAt = completedAt;
+    }
+
+    public LocalDateTime getOwnerConfirmedAt() {
+        return ownerConfirmedAt;
+    }
+
+    public void setOwnerConfirmedAt(LocalDateTime ownerConfirmedAt) {
+        this.ownerConfirmedAt = ownerConfirmedAt;
+    }
+
+    public LocalDateTime getRequesterConfirmedAt() {
+        return requesterConfirmedAt;
+    }
+
+    public void setRequesterConfirmedAt(LocalDateTime requesterConfirmedAt) {
+        this.requesterConfirmedAt = requesterConfirmedAt;
     }
 }
