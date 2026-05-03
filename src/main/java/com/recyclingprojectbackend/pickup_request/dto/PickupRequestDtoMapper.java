@@ -24,7 +24,9 @@ public class PickupRequestDtoMapper {
                 pickupRequest.getStatus(),
                 pickupRequest.getCreatedAt(),
                 pickupRequest.getExpiresAt(),
-                address
+                address,
+                pickupRequest.getOwnerConfirmedAt(),
+                pickupRequest.getRequesterConfirmedAt()
         );
     }
 }

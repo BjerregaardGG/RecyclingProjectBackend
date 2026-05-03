@@ -1,5 +1,6 @@
 package com.recyclingprojectbackend.pickup_request.service;
 
+import com.recyclingprojectbackend.exceptions.BusinessException;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
@@ -10,6 +11,7 @@ import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +43,7 @@ public class PickupServiceImpl implements PickupService {
 
     @Override
     public List<PickUpRequestDto> findMyIncomingPickupRequests(long owner_id) {
-        return pickupRepository.findByOwner_IdAndStatusIn(owner_id, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED))
+        return pickupRepository.findByOwner_IdAndStatusIn(owner_id, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED, PickupStatus.COMPLETED))
                 .stream()
                 .map(pickupRequestDtoMapper::pickupRequestToPickupRequestDto)
                 .toList();
@@ -49,7 +51,7 @@ public class PickupServiceImpl implements PickupService {
 
     @Override
     public List<PickUpRequestDto> findMyOutgoingPickupRequests(long ownerId) {
-        return pickupRepository.findByRequester_IdAndStatusIn(ownerId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED))
+        return pickupRepository.findByRequester_IdAndStatusIn(ownerId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED, PickupStatus.COMPLETED))
                 .stream()
                 .map(pickupRequestDtoMapper::pickupRequestToPickupRequestDto)
                 .toList();
@@ -129,27 +131,31 @@ public class PickupServiceImpl implements PickupService {
             request.setCompletedAt(LocalDateTime.now());
             request.setStatus(PickupStatus.COMPLETED);
         }
+
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRepository.save(request));
     }
 
     @Override
     @Transactional
-    public PickUpRequestDto createPickupRequest(Long itemId, long requesterId) {
+    public PickUpRequestDto createPickupRequest(Long itemId, long userId) {
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
-        User user = userRepository.findById(requesterId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (item.getUser().getId().equals(requesterId)) {
+        if (item.getUser().getId().equals(userId)) {
             throw new IllegalStateException("The item belongs to the requester");
         }
 
-        boolean alreadyExists = pickupRepository.existsByItem_IdAndRequester_IdAndStatusIn(itemId, requesterId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED));
+        boolean alreadyExists = pickupRepository.existsByItem_IdAndRequester_IdAndStatusIn(itemId, userId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED));
 
         if (alreadyExists) {
-            throw new IllegalStateException("The request already exists for this user");
+            throw new BusinessException(
+                    HttpStatus.CONFLICT,
+                    "Du har allerede en aktiv anmodning på dette item"
+            );
         }
 
         PickupRequest pickupRequest = new PickupRequest();

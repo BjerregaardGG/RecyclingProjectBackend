@@ -17,7 +17,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         SELECT i FROM Item i
         WHERE i.id NOT IN (
             SELECT p.item.id FROM PickupRequest p
-            WHERE p.status = 'ACCEPTED'
+            WHERE p.status IN ('ACCEPTED', 'COMPLETED')
         )
     """)
     List<Item> findAllAvailable();
@@ -28,10 +28,18 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         WHERE i.category.categoryName = :categoryName
         AND i.id NOT IN (
             SELECT p.item.id FROM PickupRequest p
-            WHERE p.status = 'ACCEPTED'
+            WHERE p.status IN ('ACCEPTED', 'COMPLETED')
         )
     """)
     List<Item> findAvailableByCategory(@Param("categoryName") String categoryName);
     List<Item> findByCategory_CategoryName(String categoryName);
-    List<Item> findByUser_Id(long id);
+    @Query("""
+        SELECT i FROM Item i
+        WHERE i.user.id = :id
+        AND i.id NOT IN (
+            SELECT p.item.id FROM PickupRequest p
+            WHERE p.status = 'COMPLETED'
+        )
+    """)
+    List<Item> findByUser_Id(@Param("id") Long userId);
 }

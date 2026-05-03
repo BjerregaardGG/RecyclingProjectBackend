@@ -16,5 +16,5 @@ public interface PickupService {
     PickUpRequestDto acceptRequest(long requestId, long ownerId);
     PickUpRequestDto declineRequest(long requestId, long ownerId);
     PickUpRequestDto confirmRequest(long requestId, long userId);
-    PickUpRequestDto createPickupRequest(Long itemId, long requesterId);
+    PickUpRequestDto createPickupRequest(Long itemId, long userId);
 }
