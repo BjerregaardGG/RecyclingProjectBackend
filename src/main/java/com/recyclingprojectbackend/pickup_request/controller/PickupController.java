@@ -52,6 +52,11 @@ public class PickupController {
         return ResponseEntity.ok(pickupService.declineRequest(requestId, user.id()));
     }
 
+    @PatchMapping("/{requestId}/confirm")
+    public ResponseEntity<PickUpRequestDto> confirmRequest(@PathVariable long requestId, @AuthenticationPrincipal UserDto user) {
+        return ResponseEntity.ok(pickupService.confirmRequest(requestId, user.id()));
+    }
+
     @PostMapping("/items/{itemId}")
     public ResponseEntity<PickUpRequestDto> addPickupRequest(@PathVariable long itemId, @AuthenticationPrincipal UserDto user) {
         return ResponseEntity.ok(pickupService.createPickupRequest(itemId, user.id()));

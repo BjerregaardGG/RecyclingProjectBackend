@@ -10,6 +10,7 @@ import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -73,6 +74,7 @@ public class PickupServiceImpl implements PickupService {
 
         request.setStatus(PickupStatus.ACCEPTED);
         request.setAcceptedAt(LocalDateTime.now());
+        // We expire the pickUpRequest after 24 hours
         request.setExpiresAt(LocalDateTime.now().plusHours(24));
         PickupRequest newPickupRequest = pickupRepository.save(request);
 
@@ -93,6 +95,41 @@ public class PickupServiceImpl implements PickupService {
         PickupRequest newPickupRequest = pickupRepository.save(request);
 
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(newPickupRequest);
+    }
+
+    @Override
+    public PickUpRequestDto confirmRequest(long requestId, long userId) {
+        PickupRequest request = pickupRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Pickup not found with id: " + requestId));
+
+        boolean isOwner = request.getOwner().getId().equals(userId);
+        boolean isRequester = request.getRequester().getId().equals(userId);
+
+        if (!isOwner && !isRequester) {
+            throw new AccessDeniedException("You are not allowed to request this pickup");
+        }
+
+        if (request.getStatus() != PickupStatus.ACCEPTED) {
+            throw new IllegalStateException("Request is not accepted");
+        }
+
+        if (isOwner) {
+            if (request.getOwnerConfirmedAt() != null) {
+                throw new IllegalStateException("Pickup request has already been confirmed by owner");
+            }
+            request.setOwnerConfirmedAt(LocalDateTime.now());
+        } else {
+            if (request.getRequesterConfirmedAt() != null) {
+                throw new IllegalStateException("Pickup request has already been confirmed by requester");
+            }
+            request.setRequesterConfirmedAt(LocalDateTime.now());
+        }
+
+        if (request.isFullyConfirmed()) {
+            request.setCompletedAt(LocalDateTime.now());
+            request.setStatus(PickupStatus.COMPLETED);
+        }
+        return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRepository.save(request));
     }
 
     @Override
