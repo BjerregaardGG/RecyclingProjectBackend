@@ -16,5 +16,7 @@ public record PickUpRequestDto(
     PickupStatus status,
     LocalDateTime createdAt,
     LocalDateTime expiresAt,
-    String pickupAddress
+    String pickupAddress,
+    LocalDateTime ownerConfirmedAt,
+    LocalDateTime requesterConfirmedAt
 ){}
