@@ -27,6 +27,8 @@ public class Message {
     @Column(nullable = false)
     private LocalDateTime sentAt;
 
+    private LocalDateTime readAt;
+
     @PrePersist
     public void prePersist() {
         if (sentAt == null) sentAt = LocalDateTime.now();

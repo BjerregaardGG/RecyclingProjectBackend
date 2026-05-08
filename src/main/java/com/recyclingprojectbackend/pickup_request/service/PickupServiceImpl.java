@@ -3,6 +3,7 @@ package com.recyclingprojectbackend.pickup_request.service;
 import com.recyclingprojectbackend.exceptions.BusinessException;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
+import com.recyclingprojectbackend.message.dto.ConversationDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickupRequestDtoMapper;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;

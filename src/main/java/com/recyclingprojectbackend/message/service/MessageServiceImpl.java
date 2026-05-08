@@ -1,5 +1,6 @@
 package com.recyclingprojectbackend.message.service;
 
+import com.recyclingprojectbackend.message.dto.ConversationDto;
 import com.recyclingprojectbackend.message.dto.MessageDto;
 import com.recyclingprojectbackend.message.dto.MessageDtoMapper;
 import com.recyclingprojectbackend.message.model.Message;
@@ -13,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -66,6 +68,51 @@ public class MessageServiceImpl implements MessageService {
         message.setContent(content.trim());
 
         return messageDtoMapper.MessagetoMessageDto(messageRepository.save(message));
+    }
+
+    @Override
+    public List<ConversationDto> findActiveChatsForUser(long userId) {
+        List<PickupRequest> pickupRequests = pickupRepository.findActiveChatsForUser(userId);
+
+        return pickupRequests.stream()
+                .map(p -> {
+                    boolean isOwner = p.getOwner().getId().equals(userId);
+                    User otherUser = isOwner ? p.getRequester() : p.getOwner();
+
+                    Message lastMessage = messageRepository.findFirstByPickupRequest_IdOrderBySentAtDesc(p.getId())
+                            .orElse(null);
+
+                    int unreadCount = messageRepository.countByPickupRequest_IdAndSender_IdNotAndReadAtIsNull(p.getId(), userId);
+
+                    return new ConversationDto(
+                            p.getId(),
+                            otherUser.getId(),
+                            otherUser.getName(),
+                            otherUser.getImage(),
+                            p.getItem().getName(),
+                            p.getItem().getImage(),
+                            lastMessage != null ? lastMessage.getContent() : null,
+                            lastMessage != null ? lastMessage.getSentAt() : null,
+                            unreadCount
+                    );
+                }).toList();
+    }
+
+    @Override
+    public void markMessageAsRead(Long pickupId, Long userId) {
+        PickupRequest request = getPickupAndVerifyAccess(pickupId, userId);
+
+        List<Message> unreadMessages = messageRepository.findByPickupRequest_IdAndSender_IdNotAndReadAtIsNull(request.getId(), userId);
+
+        if (unreadMessages.isEmpty()) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        unreadMessages.forEach(unreadMessage -> {
+            unreadMessage.setSentAt(now);
+        });
+        messageRepository.saveAll(unreadMessages);
     }
 
     private PickupRequest getPickupAndVerifyAccess(Long pickupId, Long userId) {

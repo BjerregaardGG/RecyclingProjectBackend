@@ -22,12 +22,18 @@ public class MessageWebSocketController {
     }
 
     // Principal --> the logged-in user (Configured in JWT-auth)
-    @MessageMapping("/chat/{pickupId)")
-    public void handleMessage(@DestinationVariable Long pickupId, @Payload MessagePayload messageContent, Principal user) {
-        Long senderId = Long.parseLong(user.getName());
-        MessageDto savedMessage = messageService.sendMessage(pickupId, senderId, messageContent.content);
+    @MessageMapping("/chat/{pickupId}")
+    public void handleMessage(@DestinationVariable Long pickupId, @Payload MessagePayload messageContent, Principal principal) {
+        try {
+            Long senderId = Long.parseLong(principal.getName());
+            MessageDto savedMessage = messageService.sendMessage(pickupId, senderId, messageContent.content());
 
-        messagingTemplate.convertAndSend("/topic/chat/" + pickupId, savedMessage);
+            messagingTemplate.convertAndSend("/topic/chat/" + pickupId, savedMessage);
+
+        } catch (Exception e) {
+            System.err.println("Fejl i handleMessage: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public record MessagePayload(String content) {}

@@ -64,7 +64,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll() // the websocket
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws").permitAll()   // the websocket
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session ->
@@ -73,7 +74,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-    // Configures CORS to allow requests from any origin (Wastey react native).
+    // Configures CORS to allow requests from any origin.
     // Allows standard HTTP methods and all headers.
     // Applied globally to all endpoints via "/**".
     @Bean
