@@ -21,7 +21,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         )
     """)
     List<Item> findAllAvailable();
-
     // Find items that does not have status = ACCEPTED by Category
     @Query("""
         SELECT i FROM Item i

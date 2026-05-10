@@ -16,5 +16,6 @@ public interface ItemService {
     ItemDto getItemById(long id);
     List<ItemDto> getItemsByCategory(String category);
     ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
+    ItemDto deleteItemById(long id, long userId);
 
 }

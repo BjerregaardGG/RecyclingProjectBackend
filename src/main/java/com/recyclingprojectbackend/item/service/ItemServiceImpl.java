@@ -10,6 +10,8 @@ import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -97,5 +99,17 @@ public class ItemServiceImpl implements ItemService {
         newItem.setUser(user);
 
         return itemDtoMapper.itemToItemDto(itemRepository.save(newItem));
+    }
+
+    @Override
+    public ItemDto deleteItemById(long id, long userId) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
+
+        if (item.getUser().getId() != userId) {
+            throw new AccessDeniedException("Du har ikke ret til at slette denne genstand");
+        }
+        itemRepository.delete(item);
+        return itemDtoMapper.itemToItemDto(item);
     }
 }

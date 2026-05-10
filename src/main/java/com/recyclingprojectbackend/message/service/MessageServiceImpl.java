@@ -110,7 +110,7 @@ public class MessageServiceImpl implements MessageService {
 
         LocalDateTime now = LocalDateTime.now();
         unreadMessages.forEach(unreadMessage -> {
-            unreadMessage.setSentAt(now);
+            unreadMessage.setReadAt(now);
         });
         messageRepository.saveAll(unreadMessages);
     }

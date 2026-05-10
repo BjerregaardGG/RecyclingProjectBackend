@@ -83,4 +83,12 @@ public class Message {
     public void setSentAt(LocalDateTime sentAt) {
         this.sentAt = sentAt;
     }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
+    }
 }

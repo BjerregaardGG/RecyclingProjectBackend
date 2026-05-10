@@ -7,6 +7,7 @@ import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.service.ItemService;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,11 @@ public class ItemController {
     @PostMapping
     public ResponseEntity<ItemDto> addItem(@RequestBody ItemRequestDto itemRequestDto) {
         return ResponseEntity.ok(itemService.addItem(itemRequestDto));
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<ItemDto> deleteItemById(@PathVariable long id, @AuthenticationPrincipal UserDto user ) {
+        return ResponseEntity.ok(itemService.deleteItemById(id, user.id()));
     }
 
 }
