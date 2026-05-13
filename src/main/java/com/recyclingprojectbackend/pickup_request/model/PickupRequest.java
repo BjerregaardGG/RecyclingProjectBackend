@@ -4,6 +4,8 @@ import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.user.model.User;
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +19,7 @@ public class PickupRequest {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Item item;
 
     @ManyToOne(fetch = FetchType.LAZY)

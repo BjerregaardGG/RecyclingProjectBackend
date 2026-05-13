@@ -16,7 +16,9 @@ public class ItemDtoMapper {
                 item.getCategory().getCategoryName(),
                 item.getUser().getId(),
                 item.getLatitude(),
-                item.getLongitude()
+                item.getLongitude(),
+                item.getStatus(),
+                item.getReservedAt()
         );
     }
 }

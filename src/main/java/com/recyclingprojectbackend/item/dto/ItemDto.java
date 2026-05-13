@@ -1,5 +1,9 @@
 package com.recyclingprojectbackend.item.dto;
 
+import com.recyclingprojectbackend.item.util.ItemStatus;
+
+import java.time.LocalDateTime;
+
 // ItemDto - Used for getting item objects from backend
 public record ItemDto(
     long id,
@@ -10,5 +14,7 @@ public record ItemDto(
     String category,
     Long userId,
     Double latitude,
-    Double longitude
+    Double longitude,
+    ItemStatus status,
+    LocalDateTime reservedAt
 ){}

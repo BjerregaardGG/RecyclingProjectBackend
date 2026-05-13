@@ -3,6 +3,7 @@ package com.recyclingprojectbackend.pickup_request.service;
 import com.recyclingprojectbackend.exceptions.BusinessException;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.message.dto.ConversationDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickupRequestDtoMapper;
@@ -81,6 +82,12 @@ public class PickupServiceImpl implements PickupService {
         request.setExpiresAt(LocalDateTime.now().plusHours(24));
         PickupRequest newPickupRequest = pickupRepository.save(request);
 
+        // We update the item status
+        Item item = request.getItem();
+        item.setStatus(ItemStatus.RESERVED);
+        item.setReservedAt(LocalDateTime.now());
+        itemRepository.save(item);
+
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(newPickupRequest);
     }
 
@@ -96,6 +103,11 @@ public class PickupServiceImpl implements PickupService {
 
         request.setStatus(PickupStatus.REJECTED);
         PickupRequest newPickupRequest = pickupRepository.save(request);
+
+        // We update the item status
+        Item item = request.getItem();
+        item.setStatus(ItemStatus.AVAILABLE);
+        itemRepository.save(item);
 
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(newPickupRequest);
     }
@@ -128,9 +140,13 @@ public class PickupServiceImpl implements PickupService {
             request.setRequesterConfirmedAt(LocalDateTime.now());
         }
 
+        Item item = request.getItem();
+
         if (request.isFullyConfirmed()) {
             request.setCompletedAt(LocalDateTime.now());
             request.setStatus(PickupStatus.COMPLETED);
+            item.setStatus(ItemStatus.GIVEN_AWAY);
+            itemRepository.save(item);
         }
 
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRepository.save(request));
@@ -145,6 +161,10 @@ public class PickupServiceImpl implements PickupService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (item.getStatus() != ItemStatus.AVAILABLE) {
+            throw new IllegalStateException("This Item is not AVAILABLE");
+        }
 
         if (item.getUser().getId().equals(userId)) {
             throw new IllegalStateException("The item belongs to the requester");

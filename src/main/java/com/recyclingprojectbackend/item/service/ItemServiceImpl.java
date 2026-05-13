@@ -7,9 +7,12 @@ import com.recyclingprojectbackend.item.dto.ItemDtoMapper;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
+import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
+import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,12 +30,14 @@ public class ItemServiceImpl implements ItemService {
     private final ItemDtoMapper itemDtoMapper;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final PickupRepository pickupRequestRepository;
 
-    public ItemServiceImpl(ItemRepository itemRepository, ItemDtoMapper itemDtoMapper, CategoryRepository categoryRepository, UserRepository userRepository) {
+    public ItemServiceImpl(ItemRepository itemRepository, ItemDtoMapper itemDtoMapper, CategoryRepository categoryRepository, UserRepository userRepository, PickupRepository pickupRequestRepository) {
         this.itemRepository = itemRepository;
         this.itemDtoMapper = itemDtoMapper;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
+        this.pickupRequestRepository = pickupRequestRepository;
     }
 
     @Override
@@ -101,15 +106,22 @@ public class ItemServiceImpl implements ItemService {
         return itemDtoMapper.itemToItemDto(itemRepository.save(newItem));
     }
 
+    @Transactional
     @Override
     public ItemDto deleteItemById(long id, long userId) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
 
         if (item.getUser().getId() != userId) {
-            throw new AccessDeniedException("Du har ikke ret til at slette denne genstand");
+            throw new AccessDeniedException("You do not have the rights to delete this Item");
         }
         itemRepository.delete(item);
+
+        PickupRequest request = pickupRequestRepository.findByItemId(item.getId());
+        if (request == null) {
+            throw new RuntimeException("Request not found");
+        }
+        pickupRequestRepository.delete(request);
         return itemDtoMapper.itemToItemDto(item);
     }
 }

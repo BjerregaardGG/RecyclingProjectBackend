@@ -1,8 +1,11 @@
 package com.recyclingprojectbackend.item.model;
 
 import com.recyclingprojectbackend.category.model.Category;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.user.model.User;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "item")
@@ -41,7 +44,14 @@ public class Item {
     @Column(nullable = false)
     private Double longitude;
 
-    public Item(long id, String name, String description, String secondTitle, String image, Category category, User user, String address, String city, Double latitude, Double longitude) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ItemStatus status = ItemStatus.AVAILABLE;
+
+    @Column(nullable = true)
+    private LocalDateTime reservedAt;
+
+    public Item(long id, String name, String description, String secondTitle, String image, Category category, User user, String address, String city, Double latitude, Double longitude,  ItemStatus status, LocalDateTime reservedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -53,6 +63,8 @@ public class Item {
         this.city = city;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.status = status;
+        this.reservedAt = reservedAt;
     }
 
     public Item() {}
@@ -143,5 +155,21 @@ public class Item {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public ItemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ItemStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getReservedAt() {
+        return reservedAt;
+    }
+
+    public void setReservedAt(LocalDateTime reservedAt) {
+        this.reservedAt = reservedAt;
     }
 }
