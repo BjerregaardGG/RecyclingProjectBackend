@@ -1,7 +1,9 @@
 package com.recyclingprojectbackend.message.dto;
 
 import com.recyclingprojectbackend.message.model.Message;
+import org.springframework.stereotype.Component;
 
+@Component
 public class MessageDtoMapper {
 
     public MessageDto MessagetoMessageDto(Message message){

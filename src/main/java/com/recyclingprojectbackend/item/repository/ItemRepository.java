@@ -3,6 +3,7 @@ package com.recyclingprojectbackend.item.repository;
 import com.recyclingprojectbackend.category.model.Category;
 import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.model.Item;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,6 +32,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
         )
     """)
     List<Item> findAvailableByCategory(@Param("categoryName") String categoryName);
-    List<Item> findByCategory_CategoryName(String categoryName);
     List<Item> findByUser_Id(Long userId);
+    @Query("""
+        SELECT i FROM Item i
+            WHERE i.user.id = :userId
+            AND i.status = :status
+    """)
+    List<Item> findByUser_IdNotAcceptedOrCompleted(@Param("userId") Long userId, @Param("status") ItemStatus status);
 }

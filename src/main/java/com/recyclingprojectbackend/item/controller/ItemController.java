@@ -5,6 +5,7 @@ import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.service.ItemService;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,6 +37,11 @@ public class ItemController {
     @GetMapping("/{id}")
     public ResponseEntity<ItemDto> getItemById(@PathVariable long id) {
         return ResponseEntity.ok(itemService.getItemById(id));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<ItemDto>> getItemsByUserId(@PathVariable long userId) {
+        return ResponseEntity.ok(itemService.getAvailableItemsByUserId(userId, ItemStatus.AVAILABLE));
     }
 
     @GetMapping("/category")

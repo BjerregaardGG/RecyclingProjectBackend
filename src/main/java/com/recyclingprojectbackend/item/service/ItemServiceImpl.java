@@ -7,6 +7,7 @@ import com.recyclingprojectbackend.item.dto.ItemDtoMapper;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
 import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.user.dto.UserDto;
@@ -44,7 +45,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getItems() {
         return itemRepository.findAllAvailable()
                 .stream()
-                .map(item -> itemDtoMapper.itemToItemDto(item))
+                .map(itemDtoMapper::itemToItemDto)
                 .toList();
     }
 
@@ -60,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
 
         return itemRepository.findByUser_Id(userDto.id())
                 .stream()
-                .map(item -> itemDtoMapper.itemToItemDto(item))
+                .map(itemDtoMapper::itemToItemDto)
                 .toList();
     }
 
@@ -73,10 +74,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<ItemDto> getAvailableItemsByUserId(long userId, ItemStatus status) {
+        userRepository.findById(userId).
+                orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        return itemRepository.findByUser_IdNotAcceptedOrCompleted(userId, status)
+                .stream()
+                .map(itemDtoMapper::itemToItemDto)
+                .toList();
+    }
+
+    @Override
     public List<ItemDto> getItemsByCategory(String category) {
         return itemRepository.findAvailableByCategory(category)
                 .stream()
-                .map(item -> itemDtoMapper.itemToItemDto(item))
+                .map(itemDtoMapper::itemToItemDto)
                 .toList();
     }
 

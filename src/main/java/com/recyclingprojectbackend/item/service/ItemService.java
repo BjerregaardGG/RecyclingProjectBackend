@@ -4,6 +4,7 @@ import com.recyclingprojectbackend.category.model.Category;
 import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
+import com.recyclingprojectbackend.item.util.ItemStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -14,6 +15,7 @@ public interface ItemService {
     List<ItemDto> getItems();
     List<ItemDto> getLoggedInUserItems();
     ItemDto getItemById(long id);
+    List<ItemDto> getAvailableItemsByUserId(long userId, ItemStatus status);
     List<ItemDto> getItemsByCategory(String category);
     ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
     ItemDto deleteItemById(long id, long userId);
