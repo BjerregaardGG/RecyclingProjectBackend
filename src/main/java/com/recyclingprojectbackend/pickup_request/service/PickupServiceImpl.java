@@ -5,6 +5,10 @@ import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.message.dto.ConversationDto;
+import com.recyclingprojectbackend.notification.Repository.NotificationRepository;
+import com.recyclingprojectbackend.notification.model.Notification;
+import com.recyclingprojectbackend.notification.service.NotificationService;
+import com.recyclingprojectbackend.notification.util.NotificationType;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickupRequestDtoMapper;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
@@ -27,12 +31,16 @@ public class PickupServiceImpl implements PickupService {
     private final UserRepository userRepository;
     private final PickupRepository pickupRepository;
     private final PickupRequestDtoMapper pickupRequestDtoMapper;
+    private final NotificationService notificationService;
+    private final NotificationRepository notificationRepository;
 
-    public PickupServiceImpl(ItemRepository itemRepository, UserRepository userRepository,  PickupRepository pickupRepository, PickupRequestDtoMapper pickupRequestDtoMapper) {
+    public PickupServiceImpl(ItemRepository itemRepository, UserRepository userRepository,  PickupRepository pickupRepository, PickupRequestDtoMapper pickupRequestDtoMapper,  NotificationService notificationService, NotificationRepository notificationRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.pickupRepository = pickupRepository;
         this.pickupRequestDtoMapper = pickupRequestDtoMapper;
+        this.notificationService = notificationService;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -88,6 +96,13 @@ public class PickupServiceImpl implements PickupService {
         item.setReservedAt(LocalDateTime.now());
         itemRepository.save(item);
 
+        notificationService.createNotification(
+                request.getRequester().getId(),
+                request.getOwner().getId(),
+                NotificationType.REQUEST_ACCEPTED,
+                "Din anmodning blev accepteret!",
+                request.getId());
+
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(newPickupRequest);
     }
 
@@ -109,9 +124,17 @@ public class PickupServiceImpl implements PickupService {
         item.setStatus(ItemStatus.AVAILABLE);
         itemRepository.save(item);
 
+        notificationService.createNotification(
+                request.getRequester().getId(),
+                request.getOwner().getId(),
+                NotificationType.REQUEST_DECLINED,
+                "Din anmodning blev ikke accepteret",
+                request.getId());
+
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(newPickupRequest);
     }
 
+    @Transactional
     @Override
     public PickUpRequestDto confirmRequest(long requestId, long userId) {
         PickupRequest request = pickupRepository.findById(requestId)
@@ -133,11 +156,24 @@ public class PickupServiceImpl implements PickupService {
                 throw new IllegalStateException("Pickup request has already been confirmed by owner");
             }
             request.setOwnerConfirmedAt(LocalDateTime.now());
+            notificationService.createNotification(
+                    request.getRequester().getId(),
+                    request.getOwner().getId(),
+                    NotificationType.PICKUP_COMPLETED,
+                    request.getOwner().getName() + " har godkendt afhentning",
+                    request.getId());
+
         } else {
             if (request.getRequesterConfirmedAt() != null) {
                 throw new IllegalStateException("Pickup request has already been confirmed by requester");
             }
             request.setRequesterConfirmedAt(LocalDateTime.now());
+            notificationService.createNotification(
+                    request.getOwner().getId(),
+                    request.getRequester().getId(),
+                    NotificationType.PICKUP_COMPLETED,
+                    request.getRequester().getName() + " har godkendt afhentning",
+                    request.getId());
         }
 
         Item item = request.getItem();
@@ -147,6 +183,24 @@ public class PickupServiceImpl implements PickupService {
             request.setStatus(PickupStatus.COMPLETED);
             item.setStatus(ItemStatus.GIVEN_AWAY);
             itemRepository.save(item);
+
+            // To the owner
+            notificationService.createNotification(
+                    request.getOwner().getId(),
+                    request.getRequester().getId(),
+                    NotificationType.PICKUP_COMPLETED,
+                    "Din snatch er nu godkendt og afsluttet",
+                    request.getId()
+            );
+
+            // To the requester
+            notificationService.createNotification(
+                    request.getRequester().getId(),
+                    request.getOwner().getId(),
+                    NotificationType.PICKUP_COMPLETED,
+                    "Tillykke med din nye snatch!",
+                    request.getId()
+            );
         }
 
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRepository.save(request));
@@ -186,6 +240,14 @@ public class PickupServiceImpl implements PickupService {
         pickupRequest.setCreatedAt(LocalDateTime.now());
         pickupRequest.setOwner(item.getUser());
         pickupRepository.save(pickupRequest);
+
+        // create the notification
+        notificationService.createNotification(
+                pickupRequest.getOwner().getId(),
+                pickupRequest.getRequester().getId(),
+                NotificationType.PICKUP_REQUEST,
+                "Du har fået en anmodning på dit item",
+                pickupRequest.getId());
 
         return pickupRequestDtoMapper.pickupRequestToPickupRequestDto(pickupRequest);
     }

@@ -1,5 +1,6 @@
 package com.recyclingprojectbackend.notification.model;
 
+import com.recyclingprojectbackend.notification.util.NotificationType;
 import com.recyclingprojectbackend.user.model.User;
 import jakarta.persistence.*;
 
@@ -16,17 +17,24 @@ public class Notification {
     @JoinColumn(name = "user_id")
     private User user;
 
-    private String requestState;
+    @ManyToOne
+    @JoinColumn(name = "other_user_id")
+    private User otherUser;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationType type;
     private String message;
     private Long relatedId;
     private boolean isRead = false;
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
-    public Notification(long id, User user, String requestState, String message, Long relatedId, boolean isRead, Instant createdAt) {
+    public Notification(long id, User user, User otherUser, NotificationType type, String message, Long relatedId, boolean isRead, Instant createdAt) {
         this.id = id;
         this.user = user;
-        this.requestState = requestState;
+        this.otherUser = otherUser;
+        this.type = type;
         this.message = message;
         this.relatedId = relatedId;
         this.isRead = isRead;
@@ -37,6 +45,14 @@ public class Notification {
 
     public long getId() {
         return id;
+    }
+
+    public User getOtherUser() {
+        return otherUser;
+    }
+
+    public void setOtherUser(User otherUser) {
+        this.otherUser = otherUser;
     }
 
     public void setId(long id) {
@@ -51,12 +67,12 @@ public class Notification {
         this.user = user;
     }
 
-    public String getRequestState() {
-        return requestState;
+    public void setType(NotificationType type) {
+        this.type = type;
     }
 
-    public void setRequestState(String requestState) {
-        this.requestState = requestState;
+    public NotificationType getType() {
+        return type;
     }
 
     public String getMessage() {

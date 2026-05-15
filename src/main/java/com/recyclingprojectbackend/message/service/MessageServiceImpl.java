@@ -5,6 +5,7 @@ import com.recyclingprojectbackend.message.dto.MessageDto;
 import com.recyclingprojectbackend.message.dto.MessageDtoMapper;
 import com.recyclingprojectbackend.message.model.Message;
 import com.recyclingprojectbackend.message.repository.MessageRepository;
+import com.recyclingprojectbackend.notification.service.NotificationService;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
 import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
@@ -24,12 +25,14 @@ public class MessageServiceImpl implements MessageService {
     private final UserRepository userRepository;
     private final PickupRepository pickupRepository;
     private final MessageDtoMapper messageDtoMapper;
+    private final NotificationService notificationService;
 
-    public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, PickupRepository pickupRepository) {
+    public MessageServiceImpl(MessageRepository messageRepository, UserRepository userRepository, PickupRepository pickupRepository, MessageDtoMapper messageDtoMapper, NotificationService  notificationService) {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
         this.pickupRepository = pickupRepository;
         this.messageDtoMapper = new MessageDtoMapper();
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -66,6 +69,17 @@ public class MessageServiceImpl implements MessageService {
         message.setPickupRequest(request);
         message.setSender(user);
         message.setContent(content.trim());
+
+        User recipient = user.getId().equals(request.getOwner().getId())
+                ? request.getRequester()
+                : request.getOwner();
+
+        notificationService.createOrUpdateMessageNotification(
+                recipient.getId(),
+                user.getId(),
+                user.getName(),
+                pickupId
+        );
 
         return messageDtoMapper.MessagetoMessageDto(messageRepository.save(message));
     }
@@ -127,6 +141,4 @@ public class MessageServiceImpl implements MessageService {
         }
         return pickup;
     }
-
-
 }
