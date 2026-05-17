@@ -2,7 +2,7 @@ package com.recyclingprojectbackend.pickup_request.dto;
 
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 public record PickUpRequestDto(
     Long id,
@@ -14,9 +14,9 @@ public record PickUpRequestDto(
     Long ownerId,
     String ownerName,
     PickupStatus status,
-    LocalDateTime createdAt,
-    LocalDateTime expiresAt,
+    Instant createdAt,
+    Instant expiresAt,
     String pickupAddress,
-    LocalDateTime ownerConfirmedAt,
-    LocalDateTime requesterConfirmedAt
+    Instant ownerConfirmedAt,
+    Instant requesterConfirmedAt
 ){}

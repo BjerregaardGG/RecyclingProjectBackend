@@ -21,7 +21,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -85,9 +87,9 @@ public class PickupServiceImpl implements PickupService {
         }
 
         request.setStatus(PickupStatus.ACCEPTED);
-        request.setAcceptedAt(LocalDateTime.now());
+        request.setAcceptedAt(Instant.now());
         // We expire the pickUpRequest after 24 hours
-        request.setExpiresAt(LocalDateTime.now().plusHours(24));
+        request.setExpiresAt(Instant.now().plus(24, ChronoUnit.HOURS));
         PickupRequest newPickupRequest = pickupRepository.save(request);
 
         // We update the item status
@@ -155,7 +157,7 @@ public class PickupServiceImpl implements PickupService {
             if (request.getOwnerConfirmedAt() != null) {
                 throw new IllegalStateException("Pickup request has already been confirmed by owner");
             }
-            request.setOwnerConfirmedAt(LocalDateTime.now());
+            request.setOwnerConfirmedAt(Instant.now());
             notificationService.createNotification(
                     request.getRequester().getId(),
                     request.getOwner().getId(),
@@ -167,7 +169,7 @@ public class PickupServiceImpl implements PickupService {
             if (request.getRequesterConfirmedAt() != null) {
                 throw new IllegalStateException("Pickup request has already been confirmed by requester");
             }
-            request.setRequesterConfirmedAt(LocalDateTime.now());
+            request.setRequesterConfirmedAt(Instant.now());
             notificationService.createNotification(
                     request.getOwner().getId(),
                     request.getRequester().getId(),
@@ -179,7 +181,7 @@ public class PickupServiceImpl implements PickupService {
         Item item = request.getItem();
 
         if (request.isFullyConfirmed()) {
-            request.setCompletedAt(LocalDateTime.now());
+            request.setCompletedAt(Instant.now());
             request.setStatus(PickupStatus.COMPLETED);
             item.setStatus(ItemStatus.GIVEN_AWAY);
             itemRepository.save(item);
@@ -237,7 +239,7 @@ public class PickupServiceImpl implements PickupService {
         pickupRequest.setRequester(user);
         pickupRequest.setItem(item);
         pickupRequest.setStatus(PickupStatus.PENDING);
-        pickupRequest.setCreatedAt(LocalDateTime.now());
+        pickupRequest.setCreatedAt(Instant.now());
         pickupRequest.setOwner(item.getUser());
         pickupRepository.save(pickupRequest);
 

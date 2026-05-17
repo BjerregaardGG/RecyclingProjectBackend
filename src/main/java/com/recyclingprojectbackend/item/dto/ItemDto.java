@@ -16,5 +16,7 @@ public record ItemDto(
     Double latitude,
     Double longitude,
     ItemStatus status,
-    LocalDateTime reservedAt
+    LocalDateTime reservedAt,
+    long likeCount,
+    boolean isLikedByCurrentUser
 ){}

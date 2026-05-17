@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -27,4 +28,8 @@ public interface PickupRepository extends JpaRepository<PickupRequest, Long> {
     ORDER BY p.acceptedAt DESC
 """)
     List<PickupRequest> findActiveChatsForUser(@Param("userId") Long userId);
+    List<PickupRequest> findByStatusAndExpiresAtBefore(
+            PickupStatus status,
+            Instant cutoff
+    );
 }

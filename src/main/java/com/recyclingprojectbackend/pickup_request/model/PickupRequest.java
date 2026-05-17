@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,21 +36,21 @@ public class PickupRequest {
     private PickupStatus status;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
-    private LocalDateTime acceptedAt;
-    private LocalDateTime expiresAt;
-    private LocalDateTime completedAt;
-    private LocalDateTime ownerConfirmedAt;
-    private LocalDateTime requesterConfirmedAt;
+    private Instant acceptedAt;
+    private Instant expiresAt;
+    private Instant completedAt;
+    private Instant ownerConfirmedAt;
+    private Instant requesterConfirmedAt;
 
     @PrePersist
     public void prePersist() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (createdAt == null) createdAt = Instant.now();
         if (status == null) status = PickupStatus.PENDING;
     }
 
-    public PickupRequest(long id, Item item, User requester, User owner, PickupStatus status, LocalDateTime createdAt, LocalDateTime acceptedAt, LocalDateTime expiresAt, LocalDateTime completedAt) {
+    public PickupRequest(long id, Item item, User requester, User owner, PickupStatus status, Instant createdAt, Instant acceptedAt, Instant expiresAt, Instant completedAt,  Instant ownerConfirmedAt, Instant requesterConfirmedAt) {
         this.id = id;
         this.item = item;
         this.requester = requester;
@@ -59,6 +60,8 @@ public class PickupRequest {
         this.acceptedAt = acceptedAt;
         this.expiresAt = expiresAt;
         this.completedAt = completedAt;
+        this.ownerConfirmedAt = ownerConfirmedAt;
+        this.requesterConfirmedAt = requesterConfirmedAt;
     }
 
     public PickupRequest() {}
@@ -107,51 +110,51 @@ public class PickupRequest {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getAcceptedAt() {
+    public Instant getAcceptedAt() {
         return acceptedAt;
     }
 
-    public void setAcceptedAt(LocalDateTime acceptedAt) {
+    public void setAcceptedAt(Instant acceptedAt) {
         this.acceptedAt = acceptedAt;
     }
 
-    public LocalDateTime getExpiresAt() {
+    public Instant getExpiresAt() {
         return expiresAt;
     }
 
-    public void setExpiresAt(LocalDateTime expiresAt) {
+    public void setExpiresAt(Instant expiresAt) {
         this.expiresAt = expiresAt;
     }
 
-    public LocalDateTime getCompletedAt() {
+    public Instant getCompletedAt() {
         return completedAt;
     }
 
-    public void setCompletedAt(LocalDateTime completedAt) {
+    public void setCompletedAt(Instant completedAt) {
         this.completedAt = completedAt;
     }
 
-    public LocalDateTime getOwnerConfirmedAt() {
+    public Instant getOwnerConfirmedAt() {
         return ownerConfirmedAt;
     }
 
-    public void setOwnerConfirmedAt(LocalDateTime ownerConfirmedAt) {
+    public void setOwnerConfirmedAt(Instant ownerConfirmedAt) {
         this.ownerConfirmedAt = ownerConfirmedAt;
     }
 
-    public LocalDateTime getRequesterConfirmedAt() {
+    public Instant getRequesterConfirmedAt() {
         return requesterConfirmedAt;
     }
 
-    public void setRequesterConfirmedAt(LocalDateTime requesterConfirmedAt) {
+    public void setRequesterConfirmedAt(Instant requesterConfirmedAt) {
         this.requesterConfirmedAt = requesterConfirmedAt;
     }
 }
