@@ -25,8 +25,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemDto>> getItems() {
-        return ResponseEntity.ok(itemService.getItems());
+    public ResponseEntity<List<ItemDto>> getItems(@AuthenticationPrincipal UserDto user) {
+        return ResponseEntity.ok(itemService.getItems(user.id()));
     }
 
     @GetMapping("/me")
@@ -35,8 +35,8 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDto> getItemById(@PathVariable long id) {
-        return ResponseEntity.ok(itemService.getItemById(id));
+    public ResponseEntity<ItemDto> getItemById(@PathVariable long id, @AuthenticationPrincipal UserDto user) {
+        return ResponseEntity.ok(itemService.getItemById(id, user.id()));
     }
 
     @GetMapping("/user/{userId}")
@@ -44,18 +44,13 @@ public class ItemController {
         return ResponseEntity.ok(itemService.getAvailableItemsByUserId(userId, ItemStatus.AVAILABLE));
     }
 
-    @GetMapping("/category")
-    public ResponseEntity<List<ItemDto>> getItemsByCategory(@RequestParam String category) {
-        return ResponseEntity.ok(itemService.getItemsByCategory(category));
-    }
-
     @PostMapping
-    public ResponseEntity<ItemDto> addItem(@RequestBody ItemRequestDto itemRequestDto) {
-        return ResponseEntity.ok(itemService.addItem(itemRequestDto));
+    public ResponseEntity<ItemDto> addItem(@RequestBody ItemRequestDto itemRequestDto, @AuthenticationPrincipal UserDto user) {
+        return ResponseEntity.ok(itemService.addItem(itemRequestDto, user.id()));
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<ItemDto> deleteItemById(@PathVariable long id, @AuthenticationPrincipal UserDto user ) {
+    public ResponseEntity<ItemDto> deleteItemById(@PathVariable long id, @AuthenticationPrincipal UserDto user) {
         return ResponseEntity.ok(itemService.deleteItemById(id, user.id()));
     }
 

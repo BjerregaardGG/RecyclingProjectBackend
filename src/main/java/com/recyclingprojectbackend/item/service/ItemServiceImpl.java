@@ -42,10 +42,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> getItems() {
+    public List<ItemDto> getItems(long userId) {
         return itemRepository.findAllAvailable()
                 .stream()
-                .map(itemDtoMapper::itemToItemDto)
+                .map(item -> itemDtoMapper.itemToItemDtoForUser(item, userId ))
                 .toList();
     }
 
@@ -59,18 +59,20 @@ public class ItemServiceImpl implements ItemService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        return itemRepository.findByUser_Id(userDto.id())
+        long userId = userDto.id();
+
+        return itemRepository.findByUser_Id(userId)
                 .stream()
-                .map(itemDtoMapper::itemToItemDto)
+                .map(item -> itemDtoMapper.itemToItemDtoForUser(item, userId))
                 .toList();
     }
 
     @Override
-    public ItemDto getItemById(long id) {
+    public ItemDto getItemById(long id, long userId) {
         Item item = itemRepository.findById(id).
                 orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
 
-        return itemDtoMapper.itemToItemDto(item);
+        return itemDtoMapper.itemToItemDtoForUser(item, userId);
     }
 
     @Override
@@ -80,27 +82,16 @@ public class ItemServiceImpl implements ItemService {
 
         return itemRepository.findByUser_IdNotAcceptedOrCompleted(userId, status)
                 .stream()
-                .map(itemDtoMapper::itemToItemDto)
+                .map(item -> itemDtoMapper.itemToItemDtoForUser(item, userId))
                 .toList();
     }
 
     @Override
-    public List<ItemDto> getItemsByCategory(String category) {
-        return itemRepository.findAvailableByCategory(category)
-                .stream()
-                .map(itemDtoMapper::itemToItemDto)
-                .toList();
-    }
-
-    @Override
-    public ItemDto addItem(ItemRequestDto itemRequestDto) {
+    public ItemDto addItem(ItemRequestDto itemRequestDto, long userId) {
         Category category = categoryRepository.findById(itemRequestDto.categoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        UserDto userDto = (UserDto) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
-
-        User user = userRepository.findById(userDto.id())
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Item newItem = new Item();
@@ -115,7 +106,7 @@ public class ItemServiceImpl implements ItemService {
         newItem.setLongitude(itemRequestDto.longitude());
         newItem.setUser(user);
 
-        return itemDtoMapper.itemToItemDto(itemRepository.save(newItem));
+        return itemDtoMapper.itemToItemDtoForUser(itemRepository.save(newItem), userId);
     }
 
     @Transactional
@@ -134,6 +125,6 @@ public class ItemServiceImpl implements ItemService {
             throw new RuntimeException("Request not found");
         }
         pickupRequestRepository.delete(request);
-        return itemDtoMapper.itemToItemDto(item);
+        return itemDtoMapper.itemToItemDtoForUser(item, userId);
     }
 }

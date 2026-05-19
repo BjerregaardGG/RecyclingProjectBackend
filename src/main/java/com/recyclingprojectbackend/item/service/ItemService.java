@@ -12,12 +12,11 @@ import java.util.List;
 
 
 public interface ItemService {
-    List<ItemDto> getItems();
+    List<ItemDto> getItems(long userId);
     List<ItemDto> getLoggedInUserItems();
-    ItemDto getItemById(long id);
+    ItemDto getItemById(long id, long userId);
     List<ItemDto> getAvailableItemsByUserId(long userId, ItemStatus status);
-    List<ItemDto> getItemsByCategory(String category);
-    ItemDto addItem(@RequestBody ItemRequestDto itemRequestDto);
+    ItemDto addItem(ItemRequestDto itemRequestDto, long userId);
     ItemDto deleteItemById(long id, long userId);
 
 }

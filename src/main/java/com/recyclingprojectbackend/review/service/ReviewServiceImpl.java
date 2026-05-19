@@ -1,0 +1,100 @@
+package com.recyclingprojectbackend.review.service;
+
+import com.recyclingprojectbackend.notification.service.NotificationService;
+import com.recyclingprojectbackend.notification.util.NotificationType;
+import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
+import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
+import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
+import com.recyclingprojectbackend.review.dto.ReviewDto;
+import com.recyclingprojectbackend.review.dto.ReviewDtoMapper;
+import com.recyclingprojectbackend.review.dto.ReviewDtoRequest;
+import com.recyclingprojectbackend.review.model.Review;
+import com.recyclingprojectbackend.review.repository.ReviewRepository;
+import com.recyclingprojectbackend.user.dto.UserRatingDto;
+import com.recyclingprojectbackend.user.model.User;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
+
+@Service
+public class ReviewServiceImpl implements ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final PickupRepository pickupRepository;
+    private final NotificationService notificationService;
+    private final ReviewDtoMapper reviewDtoMapper;
+
+    public ReviewServiceImpl(ReviewRepository reviewRepository, PickupRepository pickupRepository, NotificationService notificationService, ReviewDtoMapper reviewDtoMapper) {
+        this.reviewRepository = reviewRepository;
+        this.pickupRepository = pickupRepository;
+        this.notificationService = notificationService;
+        this.reviewDtoMapper = reviewDtoMapper;
+    }
+
+    @Transactional
+    @Override
+    public ReviewDto createReview(long pickupId, long userId, int rating) {
+        if (rating < 1 || rating > 5) {
+            throw new IllegalStateException("You can not rate below 1 or above 5");
+        }
+
+        PickupRequest request = pickupRepository.findById(pickupId)
+                .orElseThrow(() -> new RuntimeException("Pickup not found"));
+
+        if (request.getStatus() != PickupStatus.COMPLETED) {
+            throw new IllegalStateException("You can not review a request, which is not completed");
+        }
+
+        User reviewer;
+        User reviewed;
+
+        if (Objects.equals(request.getOwner().getId(), userId)) {
+            reviewer = request.getOwner();
+            reviewed = request.getRequester();
+        } else if (Objects.equals(request.getRequester().getId(), userId)) {
+            reviewer = request.getRequester();
+            reviewed = request.getOwner();
+        } else {
+            throw new IllegalStateException("You are not a part of this request");
+        }
+
+        if (reviewRepository.existsByReviewer_IdAndPickup_Id(userId, pickupId)) {
+            throw new IllegalStateException("The request already has a review");
+        }
+
+        Review review = new Review();
+        review.setReviewer(reviewer);
+        review.setReviewed(reviewed);
+        review.setPickup(request);
+        review.setRating(rating);
+
+        Review savedReview = reviewRepository.save(review);
+
+        notificationService.createNotification(
+                reviewed.getId(),
+                reviewer.getId(),
+                NotificationType.NEW_REVIEW,
+                reviewer.getName() + " har givet dig en anmeldelse",
+                savedReview.getId()
+        );
+
+        return reviewDtoMapper.reviewToReviewDto(savedReview);
+    }
+
+    @Override
+    public List<ReviewDto> getReviewsForUser(long reviewedId) {
+        return reviewRepository.findByReviewed_IdOrderByCreatedAtDesc(reviewedId)
+                .stream()
+                .map(reviewDtoMapper::reviewToReviewDto)
+                .toList();
+    }
+
+    @Override
+    public UserRatingDto getUserRating(long reviewedId) {
+        Double average = reviewRepository.findAverageRatingForUser(reviewedId);
+        long reviewCount = reviewRepository.countByReviewed_Id(reviewedId);
+        return new UserRatingDto(average != null ? average : 0.0, reviewCount);
+    }
+}

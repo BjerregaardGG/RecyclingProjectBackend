@@ -13,24 +13,7 @@ public class ItemDtoMapper {
         this.itemLikeRepository = itemLikeRepository;
     }
 
-    public ItemDto itemToItemDto(Item item) {
-        return new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getSecondTitle(),
-                item.getImage(),
-                item.getCategory().getCategoryName(),
-                item.getUser().getId(),
-                item.getLatitude(),
-                item.getLongitude(),
-                item.getStatus(),
-                item.getReservedAt(),
-                itemLikeRepository.countByItem_Id(item.getId()),
-                false
-        );
-    }
-
+    // this also accepts the logged in userId, so that we can decide the like status
     public ItemDto itemToItemDtoForUser(Item item, long currentUserId) {
         return new ItemDto(
                 item.getId(),
