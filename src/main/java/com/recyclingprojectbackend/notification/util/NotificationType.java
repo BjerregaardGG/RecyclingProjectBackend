@@ -7,6 +7,7 @@ public enum NotificationType {
     PICKUP_COMPLETED,     // relatedId = pickupId
     PICKUP_EXPIRED,       // relatedId = pickupId
     NEW_REVIEW,           // relatedId = reviewId
+    INCOMING_REVIEW,      // relatedId = reviewId
     NEW_MESSAGE,          // relatedId = pickupId (chat-tråden)
     ITEM_FAVORITED,       // relatedId = itemId
     SYSTEM,

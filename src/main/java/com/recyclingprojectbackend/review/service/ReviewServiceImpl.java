@@ -1,5 +1,6 @@
 package com.recyclingprojectbackend.review.service;
 
+import com.recyclingprojectbackend.notification.Repository.NotificationRepository;
 import com.recyclingprojectbackend.notification.service.NotificationService;
 import com.recyclingprojectbackend.notification.util.NotificationType;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
@@ -25,12 +26,14 @@ public class ReviewServiceImpl implements ReviewService {
     private final PickupRepository pickupRepository;
     private final NotificationService notificationService;
     private final ReviewDtoMapper reviewDtoMapper;
+    private final NotificationRepository notificationRepository;
 
-    public ReviewServiceImpl(ReviewRepository reviewRepository, PickupRepository pickupRepository, NotificationService notificationService, ReviewDtoMapper reviewDtoMapper) {
+    public ReviewServiceImpl(ReviewRepository reviewRepository, PickupRepository pickupRepository, NotificationService notificationService, ReviewDtoMapper reviewDtoMapper, NotificationRepository notificationRepository) {
         this.reviewRepository = reviewRepository;
         this.pickupRepository = pickupRepository;
         this.notificationService = notificationService;
         this.reviewDtoMapper = reviewDtoMapper;
+        this.notificationRepository = notificationRepository;
     }
 
     @Transactional
@@ -72,10 +75,14 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
+        // We delete the NEW_REVIEW notification when a review has been given
+        notificationRepository.deleteByUser_IdAndTypeAndRelatedId(userId, NotificationType.NEW_REVIEW, pickupId);
+
         notificationService.createNotification(
+
                 reviewed.getId(),
                 reviewer.getId(),
-                NotificationType.NEW_REVIEW,
+                NotificationType.INCOMING_REVIEW,
                 reviewer.getName() + " har givet dig en anmeldelse",
                 savedReview.getId()
         );

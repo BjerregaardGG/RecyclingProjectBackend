@@ -186,7 +186,7 @@ public class PickupServiceImpl implements PickupService {
             item.setStatus(ItemStatus.GIVEN_AWAY);
             itemRepository.save(item);
 
-            // To the owner
+            // Request notification to the owner
             notificationService.createNotification(
                     request.getOwner().getId(),
                     request.getRequester().getId(),
@@ -195,12 +195,31 @@ public class PickupServiceImpl implements PickupService {
                     request.getId()
             );
 
-            // To the requester
+            // Review notification to the owner
+            notificationService.createNotification(
+                    request.getOwner().getId(),
+                    request.getRequester().getId(),
+                    NotificationType.NEW_REVIEW,
+                    "Giv " + request.getRequester().getName() + " en anmeldelse",
+                    request.getId()
+            );
+
+
+            // Request notification the requester
             notificationService.createNotification(
                     request.getRequester().getId(),
                     request.getOwner().getId(),
                     NotificationType.PICKUP_COMPLETED,
                     "Tillykke med din nye snatch!",
+                    request.getId()
+            );
+
+            // Review notification to the Requester
+            notificationService.createNotification(
+                    request.getRequester().getId(),
+                    request.getOwner().getId(),
+                    NotificationType.NEW_REVIEW,
+                    "Giv " + request.getOwner().getName() + " en anmeldelse",
                     request.getId()
             );
         }

@@ -5,7 +5,6 @@ import com.recyclingprojectbackend.review.dto.ReviewDtoRequest;
 import com.recyclingprojectbackend.review.service.ReviewService;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.dto.UserRatingDto;
-import com.recyclingprojectbackend.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
