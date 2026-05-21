@@ -1,8 +1,10 @@
 package com.recyclingprojectbackend.user.controller;
 
 import com.recyclingprojectbackend.user.dto.UserDto;
+import com.recyclingprojectbackend.user.dto.UserRequestDto;
 import com.recyclingprojectbackend.user.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,11 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findPublicUserById(id));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserRequestDto userDto, @AuthenticationPrincipal UserDto user) {
+        return ResponseEntity.ok(userService.updateUser(userDto, user.id()));
     }
 
     @PatchMapping("/me/image")

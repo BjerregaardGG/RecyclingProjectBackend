@@ -98,6 +98,26 @@ public class PickupServiceImpl implements PickupService {
         item.setReservedAt(LocalDateTime.now());
         itemRepository.save(item);
 
+        // We set all realted requests to DECLINED
+        List<PickupRequest> otherRequests = pickupRepository.findByItem_IdAndStatusAndIdNot(
+                item.getId(),
+                PickupStatus.PENDING,
+                requestId
+        );
+
+        for (PickupRequest otherRequest : otherRequests) {
+            otherRequest.setStatus(PickupStatus.REJECTED);
+            pickupRepository.save(otherRequest);
+
+            notificationService.createNotification(
+                    otherRequest.getRequester().getId(),
+                    ownerId,
+                    NotificationType.REQUEST_DECLINED,
+                    "Din anmodning på " + item.getName() + " blev desværre ikke valgt",
+                    otherRequest.getId()
+            );
+        }
+
         notificationService.createNotification(
                 request.getRequester().getId(),
                 request.getOwner().getId(),
@@ -283,6 +303,4 @@ public class PickupServiceImpl implements PickupService {
 
         return request;
     }
-
-
 }

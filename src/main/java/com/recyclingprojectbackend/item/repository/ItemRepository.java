@@ -39,4 +39,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             AND i.status = :status
     """)
     List<Item> findByUser_IdNotAcceptedOrCompleted(@Param("userId") Long userId, @Param("status") ItemStatus status);
+
 }

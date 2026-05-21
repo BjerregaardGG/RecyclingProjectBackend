@@ -2,6 +2,7 @@ package com.recyclingprojectbackend.user.service;
 
 import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.dto.UserDtoMapper;
+import com.recyclingprojectbackend.user.dto.UserRequestDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -74,5 +75,31 @@ public class UserServiceImpl implements UserService {
         user.setImage(image);
         userRepository.save(user);
         return image;
+    }
+
+    @Override
+    public UserDto updateUser(UserRequestDto userRequest, long userId) {
+
+        User user =  userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        if (userRequest.name() != null && !userRequest.name().isBlank()){
+            user.setName(userRequest.name().trim());
+        }
+
+        if (userRequest.city() != null && !userRequest.city().isBlank()) {
+            user.setCity(userRequest.city().trim().isEmpty() ? null : userRequest.city().trim());
+        }
+
+        if (userRequest.postalCode() != null && !userRequest.postalCode().isBlank()) {
+            user.setPostalCode(userRequest.postalCode().trim().isEmpty() ? null : userRequest.postalCode().trim());
+        }
+
+        if (userRequest.profileText() != null) {
+            user.setProfileText(userRequest.profileText().trim().isEmpty() ? null : userRequest.profileText().trim());
+        }
+
+        User savedUser = userRepository.save(user);
+        return userDtoMapper.userToUserDto(savedUser);
     }
 }

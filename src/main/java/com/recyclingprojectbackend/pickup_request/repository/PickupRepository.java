@@ -32,4 +32,9 @@ public interface PickupRepository extends JpaRepository<PickupRequest, Long> {
             PickupStatus status,
             Instant cutoff
     );
+    List<PickupRequest> findByItem_IdAndStatusAndIdNot(
+            long itemId,
+            PickupStatus status,
+            long excludeId
+    );
 }

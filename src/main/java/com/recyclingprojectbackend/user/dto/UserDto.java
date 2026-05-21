@@ -5,5 +5,6 @@ public record UserDto (
     String name,
     String email,
     String image,
-    String city
+    String city,
+    String profileText
 ){}

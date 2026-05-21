@@ -26,8 +26,11 @@ public class User {
     private String postalCode;
     @Column(unique = false, nullable = true)
     private String image;
+    @Column(nullable = true)
+    private String profileText;
 
-    public User(Long id, String name, String email, String password, List<Item> items, String city, String postalCode, String image) {
+
+    public User(Long id, String name, String email, String password, List<Item> items, String city, String postalCode, String image, String profileText) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -36,6 +39,7 @@ public class User {
         this.city = city;
         this.postalCode = postalCode;
         this.image = image;
+        this.profileText = profileText;
     }
 
     public User() {}
@@ -102,5 +106,13 @@ public class User {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getProfileText() {
+        return profileText;
+    }
+
+    public void setProfileText(String profileText) {
+        this.profileText = profileText;
     }
 }

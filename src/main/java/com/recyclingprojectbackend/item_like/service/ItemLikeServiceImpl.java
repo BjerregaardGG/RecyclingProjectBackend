@@ -1,5 +1,7 @@
 package com.recyclingprojectbackend.item_like.service;
 
+import com.recyclingprojectbackend.item.dto.ItemDto;
+import com.recyclingprojectbackend.item.dto.ItemDtoMapper;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.item_like.model.ItemLike;
@@ -9,17 +11,21 @@ import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class ItemLikeServiceImpl implements ItemLikeService {
 
     private final ItemLikeRepository itemLikeRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final ItemDtoMapper itemDtoMapper;
 
-    public ItemLikeServiceImpl(ItemLikeRepository itemLikeRepository, ItemRepository itemRepository, UserRepository userRepository) {
+    public ItemLikeServiceImpl(ItemLikeRepository itemLikeRepository, ItemRepository itemRepository, UserRepository userRepository, ItemDtoMapper itemDtoMapper) {
         this.itemLikeRepository = itemLikeRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.itemDtoMapper = itemDtoMapper;
     }
 
     @Transactional
@@ -57,5 +63,13 @@ public class ItemLikeServiceImpl implements ItemLikeService {
     @Override
     public long getLikeCount(long itemId) {
         return itemLikeRepository.countByItem_Id(itemId);
+    }
+
+    @Override
+    public List<ItemDto> getLikedItems(long userId) {
+        return itemLikeRepository.findByUser_IdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(like -> itemDtoMapper.itemToItemDtoForUser(like.getItem(), userId))
+                .toList();
     }
 }
