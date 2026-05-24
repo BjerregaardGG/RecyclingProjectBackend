@@ -34,15 +34,13 @@ public class PickupServiceImpl implements PickupService {
     private final PickupRepository pickupRepository;
     private final PickupRequestDtoMapper pickupRequestDtoMapper;
     private final NotificationService notificationService;
-    private final NotificationRepository notificationRepository;
 
-    public PickupServiceImpl(ItemRepository itemRepository, UserRepository userRepository,  PickupRepository pickupRepository, PickupRequestDtoMapper pickupRequestDtoMapper,  NotificationService notificationService, NotificationRepository notificationRepository) {
+    public PickupServiceImpl(ItemRepository itemRepository, UserRepository userRepository,  PickupRepository pickupRepository, PickupRequestDtoMapper pickupRequestDtoMapper,  NotificationService notificationService) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.pickupRepository = pickupRepository;
         this.pickupRequestDtoMapper = pickupRequestDtoMapper;
         this.notificationService = notificationService;
-        this.notificationRepository = notificationRepository;
     }
 
     @Override
