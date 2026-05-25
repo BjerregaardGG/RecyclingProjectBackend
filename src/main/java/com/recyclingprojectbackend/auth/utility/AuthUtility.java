@@ -9,8 +9,7 @@ public class AuthUtility {
         if (password.length() < 8) return false;
         if (!password.matches(".*[A-Z].*")) return false;
         if (!password.matches(".*[a-z].*")) return false;
-        if (!password.matches(".*[0-9].*")) return false;
-        return true;
+        return password.matches(".*[0-9].*");
     }
 
     public boolean checkEmail(String email) {

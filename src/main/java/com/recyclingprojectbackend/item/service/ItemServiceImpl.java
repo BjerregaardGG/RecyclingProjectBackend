@@ -14,7 +14,6 @@ import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
