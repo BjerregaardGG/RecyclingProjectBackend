@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -117,7 +118,7 @@ class PickupServiceImplTest {
         when(pickupRepository.findById(100L)).thenReturn(Optional.of(pickupRequest));
 
         // Act + Assert
-        assertThrows(IllegalStateException.class,
+        assertThrows(ResponseStatusException.class,
                 () -> pickupService.declineRequest(100L, owner.getId()));
 
         verify(pickupRepository, never()).save(any());

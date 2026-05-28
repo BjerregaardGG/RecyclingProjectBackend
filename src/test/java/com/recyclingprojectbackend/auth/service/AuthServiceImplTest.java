@@ -13,10 +13,12 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -58,19 +60,23 @@ class AuthServiceImplTest {
 
     @Test
     void wrongPassword() {
-        // Arrange
-        LoginRequestDto request = new LoginRequestDto("lasse@test.dk", "WrongPassword123");
+            // Arrange
+            LoginRequestDto request = new LoginRequestDto("lasse@test.dk", "WrongPassword123");
 
-        when(authUtility.checkPassword("WrongPassword123")).thenReturn(true);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenThrow(new BadCredentialsException("Bad credentials"));
+            when(authUtility.checkPassword("WrongPassword123")).thenReturn(true);
+            when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                    .thenThrow(new BadCredentialsException("Bad credentials"));
 
-        // Act + Assert
-        assertThrows(BadCredentialsException.class,
-                () -> authService.login(request));
+            // Act + Assert
+            ResponseStatusException ex = assertThrows(
+                    ResponseStatusException.class,
+                    () -> authService.login(request)
+            );
 
-        verify(userRepository, never()).findByEmail(any());
-        verify(jwtUtility, never()).generateToken(any(Long.class));
+            assertEquals(HttpStatus.UNAUTHORIZED, ex.getStatusCode());
+
+            verify(userRepository, never()).findByEmail(any());
+            verify(jwtUtility, never()).generateToken(any(Long.class));
     }
 
     @Test

@@ -20,6 +20,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -165,7 +166,7 @@ class ItemServiceImplTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         // Act + Assert
-        assertThrows(AccessDeniedException.class,
+        assertThrows(ResponseStatusException.class,
                 () -> itemService.deleteItemById(item.getId(), 100L));
 
         verify(itemRepository, never()).delete(any());
