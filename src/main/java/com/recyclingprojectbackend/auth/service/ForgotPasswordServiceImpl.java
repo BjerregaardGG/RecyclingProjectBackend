@@ -6,8 +6,10 @@ import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -35,7 +37,8 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Transactional
     public void handleForgotPasswordEmail(String email) {
         userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, "Email-adressen er ikke gyldig"));
 
         // 1. Delete old token
         passwordResetTokenRepository.deleteByEmail(email);
@@ -58,17 +61,19 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunne ikke finde et tilgængeligt token"));
 
         // 1. Check if password is expired --> delete
         if (passwordResetToken.isExpired()) {
             passwordResetTokenRepository.delete(passwordResetToken);
-            throw new RuntimeException("Token has expired");
+            throw new ResponseStatusException(
+                    HttpStatus.GONE, "Linket er udløbet – bed om et nyt");
         }
 
         // 2. Find the user
-        User user = userRepository.findByEmail(passwordResetToken.getEmail()).
-                orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByEmail(passwordResetToken.getEmail())
+                .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Bruger ikke fundet"));
 
         // 3. Set the new hashed password
         user.setPassword(passwordEncoder.encode(newPassword));

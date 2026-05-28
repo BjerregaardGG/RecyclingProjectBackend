@@ -14,10 +14,10 @@ import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public class ItemServiceImpl implements ItemService {
                 .getAuthentication()).getPrincipal();
 
         if (userDto == null) {
-            throw new UsernameNotFoundException("User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunne ikke finde bruger");
         }
 
         long userId = userDto.id();
@@ -68,7 +68,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto getItemById(long id, long userId) {
         Item item = itemRepository.findById(id).
-                orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunne ikke finde snatch"));
 
         return itemDtoMapper.itemToItemDtoForUser(item, userId);
     }
@@ -76,7 +76,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getAvailableItemsByUserId(long userId, ItemStatus status) {
         userRepository.findById(userId).
-                orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kunne ikke finde bruger"));
 
         return itemRepository.findByUser_IdNotAcceptedOrCompleted(userId, status)
                 .stream()
@@ -87,10 +87,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto addItem(ItemRequestDto itemRequestDto, long userId) {
         Category category = categoryRepository.findById(itemRequestDto.categoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kategori ikke fundet"
+                ));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Bruger ikke fundet"
+                ));
 
         Item newItem = new Item();
         newItem.setCategory(category);
@@ -111,18 +115,25 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto deleteItemById(long id, long userId) {
         Item item = itemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Item not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunne ikke finde denne snatch"));
 
-        if (item.getUser().getId() != userId) {
-            throw new AccessDeniedException("You do not have the rights to delete this Item");
+        if (!item.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Du har ikke rettigheder til at slette denne snatch");
         }
+
+        if (item.getStatus() != ItemStatus.AVAILABLE) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Du kan kun slette snatches der er tilgængelige");
+        }
+
+        ItemDto dto = itemDtoMapper.itemToItemDtoForUser(item, userId);
+
+        pickupRequestRepository.deleteAllByItem_Id(item.getId());
         itemRepository.delete(item);
 
-        PickupRequest request = pickupRequestRepository.findByItemId(item.getId());
-        if (request == null) {
-            throw new RuntimeException("Request not found");
-        }
-        pickupRequestRepository.delete(request);
-        return itemDtoMapper.itemToItemDtoForUser(item, userId);
+        return dto;
     }
 }

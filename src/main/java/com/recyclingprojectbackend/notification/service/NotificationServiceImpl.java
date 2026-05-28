@@ -7,8 +7,10 @@ import com.recyclingprojectbackend.notification.model.Notification;
 import com.recyclingprojectbackend.notification.util.NotificationType;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
@@ -50,10 +52,14 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void createNotification(long userId, long otherUserId,  NotificationType type, String message, Long relatedId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunne ikke finde brugeren"
+                ));
 
         User otherUser = userRepository.findById(otherUserId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunne ikke finde brugeren"
+                ));
 
         Notification notification = new Notification();
         notification.setUser(user);

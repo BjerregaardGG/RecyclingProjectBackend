@@ -116,7 +116,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         System.out.println("USER SET FROM HANDSHAKE: " + userId);
                     } else {
                         System.out.println("NO USER ID IN SESSION ATTRIBUTES - rejecting");
-                        return null;  // ← afvis CONNECT eksplicit
+                        return null;
                     }
                 }
 

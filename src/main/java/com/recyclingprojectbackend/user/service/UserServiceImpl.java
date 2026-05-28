@@ -5,13 +5,14 @@ import com.recyclingprojectbackend.user.dto.UserDtoMapper;
 import com.recyclingprojectbackend.user.dto.UserRequestDto;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,22 +29,14 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> findAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(u -> userDtoMapper.userToUserDto(u))
+                .map(userDtoMapper::userToUserDto)
                 .toList();
-    }
-
-    @Override
-    public UserDto findPublicUserById(long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-
-        return userDtoMapper.userToUserDto(user);
     }
 
     @Override
     public UserDto findUserById(long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bruger ikke fundet"));
 
         return userDtoMapper.userToUserDto(user);
     }
@@ -54,7 +47,9 @@ public class UserServiceImpl implements UserService {
                 (UsernamePasswordAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
-            throw new RuntimeException("Authentication object is null");
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Du skal være logget ind"
+            );
         }
         return (UserDto) authentication.getPrincipal();
     }
@@ -62,15 +57,18 @@ public class UserServiceImpl implements UserService {
     @Override
     public String uploadPicture(String image) {
 
-        UserDto userDto = (UserDto) Objects.requireNonNull(SecurityContextHolder.getContext()
-                .getAuthentication()).getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (userDto == null) {
-            throw new UsernameNotFoundException("User not found");
+        if (authentication == null || authentication.getPrincipal() == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED, "Du skal være logget ind"
+            );
         }
 
+        UserDto userDto = (UserDto) authentication.getPrincipal();
+
         User user = userRepository.findById(userDto.id())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userDto.id()));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bruger ikke fundet"));
 
         user.setImage(image);
         userRepository.save(user);
@@ -81,7 +79,7 @@ public class UserServiceImpl implements UserService {
     public UserDto updateUser(UserRequestDto userRequest, long userId) {
 
         User user =  userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Bruger ikke fundet"));
 
         if (userRequest.name() != null && !userRequest.name().isBlank()){
             user.setName(userRequest.name().trim());

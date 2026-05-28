@@ -9,7 +9,9 @@ import com.recyclingprojectbackend.item_like.repository.ItemLikeRepository;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -36,9 +38,13 @@ public class ItemLikeServiceImpl implements ItemLikeService {
         }
 
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunne ikke finde snatch"
+                ));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Kunne ikke finde bruger"
+                ));
 
         ItemLike itemLike = new ItemLike();
         itemLike.setItem(item);

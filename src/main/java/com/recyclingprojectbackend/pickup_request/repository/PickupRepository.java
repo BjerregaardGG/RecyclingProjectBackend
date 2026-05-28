@@ -3,9 +3,11 @@ package com.recyclingprojectbackend.pickup_request.repository;
 import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -37,4 +39,7 @@ public interface PickupRepository extends JpaRepository<PickupRequest, Long> {
             PickupStatus status,
             long excludeId
     );
+    @Modifying
+    @Transactional
+    void deleteAllByItem_Id(long itemId);
 }

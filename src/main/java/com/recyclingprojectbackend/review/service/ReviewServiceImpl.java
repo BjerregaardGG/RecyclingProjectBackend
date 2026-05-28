@@ -8,13 +8,14 @@ import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.review.dto.ReviewDto;
 import com.recyclingprojectbackend.review.dto.ReviewDtoMapper;
-import com.recyclingprojectbackend.review.dto.ReviewDtoRequest;
 import com.recyclingprojectbackend.review.model.Review;
 import com.recyclingprojectbackend.review.repository.ReviewRepository;
 import com.recyclingprojectbackend.user.dto.UserRatingDto;
 import com.recyclingprojectbackend.user.model.User;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,14 +41,17 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewDto createReview(long pickupId, long userId, int rating) {
         if (rating < 1 || rating > 5) {
-            throw new IllegalStateException("You can not rate below 1 or above 5");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Rating skal være mellem 1 og 5"
+            );
         }
 
         PickupRequest request = pickupRepository.findById(pickupId)
-                .orElseThrow(() -> new RuntimeException("Pickup not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kan ikke finde igangværende afhenting"));
 
         if (request.getStatus() != PickupStatus.COMPLETED) {
-            throw new IllegalStateException("You can not review a request, which is not completed");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Du kan kun anmelde efter afhentning er gennemført");
         }
 
         User reviewer;
@@ -60,11 +64,15 @@ public class ReviewServiceImpl implements ReviewService {
             reviewer = request.getRequester();
             reviewed = request.getOwner();
         } else {
-            throw new IllegalStateException("You are not a part of this request");
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Du er ikke en del af denne afhentning"
+            );
         }
 
         if (reviewRepository.existsByReviewer_IdAndPickup_Id(userId, pickupId)) {
-            throw new IllegalStateException("The request already has a review");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Du har allerede anmeldt denne afhentning"
+            );
         }
 
         Review review = new Review();

@@ -32,7 +32,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.findPublicUserById(id));
+        return ResponseEntity.ok(userService.findUserById(id));
     }
 
     @PatchMapping("/me")

@@ -12,8 +12,9 @@ import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,19 +52,25 @@ public class MessageServiceImpl implements MessageService {
         PickupRequest request = getPickupAndVerifyAccess(pickupId, senderId);
 
         if (request.getStatus() != PickupStatus.ACCEPTED) {
-                throw new IllegalStateException("Can not send messages on a non-accepted pickup request");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Du kan kun sende beskeder på en accepteret afhentning"
+            );
         }
 
         if (content == null || content.isBlank()) {
-            throw new IllegalArgumentException("Content or content is null or empty");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Beskeden må ikke være tom"
+            );
         }
 
         if (content.length() > 1000) {
-            throw new IllegalArgumentException("Content length exceeds 1000");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Beskeden er for lang"
+            );
         }
 
         User user = userRepository.findById(senderId)
-                .orElseThrow(() -> new AccessDeniedException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Brugeren blev ikke fundet"));
 
         Message message = new Message();
         message.setPickupRequest(request);
@@ -131,13 +138,13 @@ public class MessageServiceImpl implements MessageService {
 
     private PickupRequest getPickupAndVerifyAccess(Long pickupId, Long userId) {
         PickupRequest pickup = pickupRepository.findById(pickupId)
-                .orElseThrow(() -> new RuntimeException("Pickup not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Anmodningen blev ikke fundet"));
 
         boolean isOwner = pickup.getOwner().getId().equals(userId);
         boolean isRequester = pickup.getRequester().getId().equals(userId);
 
         if (!isOwner && !isRequester) {
-            throw new AccessDeniedException("You are not part of this pickup");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Du er ikke en del af denne anmodning");
         }
         return pickup;
     }

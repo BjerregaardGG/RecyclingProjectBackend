@@ -1,12 +1,8 @@
 package com.recyclingprojectbackend.pickup_request.service;
 
-import com.recyclingprojectbackend.exceptions.BusinessException;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.item.util.ItemStatus;
-import com.recyclingprojectbackend.message.dto.ConversationDto;
-import com.recyclingprojectbackend.notification.Repository.NotificationRepository;
-import com.recyclingprojectbackend.notification.model.Notification;
 import com.recyclingprojectbackend.notification.service.NotificationService;
 import com.recyclingprojectbackend.notification.util.NotificationType;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
@@ -18,8 +14,8 @@ import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -81,7 +77,7 @@ public class PickupServiceImpl implements PickupService {
         PickupRequest request = findRequestAndCheckOwner(requestId, ownerId);
 
         if (request.getStatus() != PickupStatus.PENDING) {
-            throw new IllegalStateException("Request is not pending");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Dette er ikke en igangværende anmodning");
         }
 
         request.setStatus(PickupStatus.ACCEPTED);
@@ -133,7 +129,7 @@ public class PickupServiceImpl implements PickupService {
         PickupRequest request = findRequestAndCheckOwner(requestId, ownerId);
 
         if (request.getStatus() != PickupStatus.PENDING) {
-            throw new IllegalStateException("Request is not pending");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Dette er ikke en igangværende anmodning");
         }
 
         request.setStatus(PickupStatus.REJECTED);
@@ -158,22 +154,24 @@ public class PickupServiceImpl implements PickupService {
     @Override
     public PickUpRequestDto confirmRequest(long requestId, long userId) {
         PickupRequest request = pickupRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Pickup not found with id: " + requestId));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Denne snatch blev ikek fundet"));
 
         boolean isOwner = request.getOwner().getId().equals(userId);
         boolean isRequester = request.getRequester().getId().equals(userId);
 
         if (!isOwner && !isRequester) {
-            throw new AccessDeniedException("You are not allowed to request this pickup");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Du har ikke tilladelse til at anmode om denne snatch");
         }
 
         if (request.getStatus() != PickupStatus.ACCEPTED) {
-            throw new IllegalStateException("Request is not accepted");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Anmodningen er ikke accepteret");
         }
 
         if (isOwner) {
             if (request.getOwnerConfirmedAt() != null) {
-                throw new IllegalStateException("Pickup request has already been confirmed by owner");
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Du har allerede bekræftet denne afhentning"
+                );
             }
             request.setOwnerConfirmedAt(Instant.now());
             notificationService.createNotification(
@@ -185,7 +183,9 @@ public class PickupServiceImpl implements PickupService {
 
         } else {
             if (request.getRequesterConfirmedAt() != null) {
-                throw new IllegalStateException("Pickup request has already been confirmed by requester");
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT, "Du har allerede bekræftet denne afhentning"
+                );
             }
             request.setRequesterConfirmedAt(Instant.now());
             notificationService.createNotification(
@@ -248,27 +248,30 @@ public class PickupServiceImpl implements PickupService {
     @Override
     @Transactional
     public PickUpRequestDto createPickupRequest(Long itemId, long userId) {
+        System.out.println(">>> createPickupRequest KØRT for item: " + itemId);
 
         Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Denne snatch blev ikke fundet"));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Denne bruger blev ikke fundet"));
 
         if (item.getStatus() != ItemStatus.AVAILABLE) {
-            throw new IllegalStateException("This Item is not AVAILABLE");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Denne snatch er ikke længere tilgængelig");
         }
 
         if (item.getUser().getId().equals(userId)) {
-            throw new IllegalStateException("The item belongs to the requester");
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT, "Du kan ikke anmode om din egen snatch"
+            );
         }
 
         boolean alreadyExists = pickupRepository.existsByItem_IdAndRequester_IdAndStatusIn(itemId, userId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED));
 
         if (alreadyExists) {
-            throw new BusinessException(
+            throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
-                    "Du har allerede en aktiv anmodning på dette item"
+                    "Du har allerede en aktiv anmodning på denne snatch"
             );
         }
 
@@ -293,10 +296,10 @@ public class PickupServiceImpl implements PickupService {
 
     public PickupRequest findRequestAndCheckOwner(long requestId, long ownerId) {
         PickupRequest request = pickupRepository.findById(requestId)
-                .orElseThrow(() -> new RuntimeException("Request not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Denne anmodning blev ikke fundet"));
 
         if (!request.getOwner().getId().equals(ownerId)) {
-            throw new IllegalStateException("You can not manage this request");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Du har ikke tilladelse til denne anmodning");
         }
 
         return request;
