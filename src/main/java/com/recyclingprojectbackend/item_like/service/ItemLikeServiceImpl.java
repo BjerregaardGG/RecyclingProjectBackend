@@ -59,18 +59,6 @@ public class ItemLikeServiceImpl implements ItemLikeService {
                 .ifPresent(itemLikeRepository::delete);
     }
 
-    @Transactional
-    @Override
-    public boolean hasLike(long itemId, long userId) {
-        return itemLikeRepository.existsByUser_IdAndItem_Id(userId, itemId);
-    }
-
-    @Transactional
-    @Override
-    public long getLikeCount(long itemId) {
-        return itemLikeRepository.countByItem_Id(itemId);
-    }
-
     @Override
     public List<ItemDto> getLikedItems(long userId) {
         return itemLikeRepository.findByUser_IdOrderByCreatedAtDesc(userId)

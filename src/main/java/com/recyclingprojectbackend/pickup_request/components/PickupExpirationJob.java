@@ -59,6 +59,24 @@ public class PickupExpirationJob {
                     "Din anmodning på " + item.getName() + " er udløbet",
                     request.getId()
             );
+
+            // Review notification to the owner
+            notificationService.createNotification(
+                    request.getOwner().getId(),
+                    request.getRequester().getId(),
+                    NotificationType.NEW_REVIEW,
+                    "Giv " + request.getRequester().getName() + " en anmeldelse",
+                    request.getId()
+            );
+
+            // Review notification to the requester
+            notificationService.createNotification(
+                    request.getRequester().getId(),
+                    request.getOwner().getId(),
+                    NotificationType.NEW_REVIEW,
+                    "Giv " + request.getOwner().getName() + " en anmeldelse",
+                    request.getId()
+            );
         }
     }
 }

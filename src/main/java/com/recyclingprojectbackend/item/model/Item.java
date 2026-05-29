@@ -14,16 +14,12 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @Column(unique = false, nullable = false)
     private String name;
-
     @Column(unique = false, nullable = false)
     private String description;
-
     @Column(unique = false, nullable = true)
     private String secondTitle;
-
     @Column(unique = false, nullable = false)
     private String image;
 

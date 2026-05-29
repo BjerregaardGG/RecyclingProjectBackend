@@ -25,7 +25,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
-    // Finds the user in the database based on email
     private final UserDetailsServiceImpl userDetailsService;
 
     public SecurityConfig(JwtFilter jwtFilter, UserDetailsServiceImpl userDetailsService) {

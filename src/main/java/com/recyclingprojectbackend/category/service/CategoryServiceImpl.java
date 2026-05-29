@@ -3,7 +3,6 @@ package com.recyclingprojectbackend.category.service;
 import com.recyclingprojectbackend.category.model.Category;
 import com.recyclingprojectbackend.category.repository.CategoryRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 

@@ -4,7 +4,7 @@ import com.recyclingprojectbackend.item.util.ItemStatus;
 
 import java.time.LocalDateTime;
 
-// ItemDto - Used for getting item objects from backend
+// ItemDto - Used for mapping item entities to client objects
 public record ItemDto(
     long id,
     String name,
@@ -18,5 +18,6 @@ public record ItemDto(
     ItemStatus status,
     LocalDateTime reservedAt,
     long likeCount,
-    boolean isLikedByCurrentUser
+    boolean isLikedByCurrentUser,
+    boolean hasActiveRequest
 ){}

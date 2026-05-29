@@ -50,7 +50,7 @@ class ItemServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ItemDtoMapper itemDtoMapper = new ItemDtoMapper(itemLikeRepository);
+        ItemDtoMapper itemDtoMapper = new ItemDtoMapper(itemLikeRepository, pickupRequestRepository);
         itemService = new ItemServiceImpl(
                 itemRepository,
                 itemDtoMapper,

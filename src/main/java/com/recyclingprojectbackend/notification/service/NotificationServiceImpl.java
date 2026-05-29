@@ -38,11 +38,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public long getUnreadCount(long userId) {
-        return notificationRepository.countByUser_IdAndIsReadFalse(userId);
-    }
-
-    @Override
     @Transactional
     public void markAllAsRead(long userId) {
         notificationRepository.markAllAsReadForUser(userId);

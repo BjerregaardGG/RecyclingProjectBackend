@@ -1,9 +1,7 @@
 package com.recyclingprojectbackend.item.controller;
 
-import com.recyclingprojectbackend.category.model.Category;
 import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
-import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.service.ItemService;
 import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.user.dto.UserDto;

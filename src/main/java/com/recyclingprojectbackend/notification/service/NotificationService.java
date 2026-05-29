@@ -7,7 +7,6 @@ import java.util.List;
 
 public interface NotificationService {
     List<NotificationDto> getLoggedInUserNotifications(long userId);
-    long getUnreadCount(long userId);
     void markAllAsRead(long userId);
     // this is used in all related service layers
     void createNotification(long userId, long otherUserId, NotificationType type, String message, Long relatedId);

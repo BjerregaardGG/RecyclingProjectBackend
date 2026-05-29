@@ -9,24 +9,21 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "messages")
 public class Message {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pickup_request_id", nullable = false)
     private PickupRequest pickupRequest;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
-
     @Column(nullable = false, length = 2000)
     private String content;
-
     @Column(nullable = false)
     private LocalDateTime sentAt;
-
+    @Column
     private LocalDateTime readAt;
 
     @PrePersist

@@ -29,7 +29,6 @@ public class User {
     @Column(nullable = true)
     private String profileText;
 
-
     public User(Long id, String name, String email, String password, List<Item> items, String city, String postalCode, String image, String profileText) {
         this.id = id;
         this.name = name;

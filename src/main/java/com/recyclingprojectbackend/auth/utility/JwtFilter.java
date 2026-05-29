@@ -19,7 +19,6 @@ import java.util.ArrayList;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
-
     private final JwtUtility jwtUtility;
     private final UserService userService;
 
@@ -28,6 +27,11 @@ public class JwtFilter extends OncePerRequestFilter {
         this.userService = userService;
     }
 
+    /**
+     * This filter intercepts every HTTP request, extracts and validates a JWT token from the Authorization header
+     * If valid, loads the user and sets it in Spring Security’s SecurityContext
+     * It skips WebSocket (/ws) requests.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

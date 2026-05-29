@@ -8,7 +8,6 @@ import com.recyclingprojectbackend.item.dto.ItemRequestDto;
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.item.util.ItemStatus;
-import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
 import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.user.dto.UserDto;
 import com.recyclingprojectbackend.user.model.User;

@@ -16,6 +16,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             Long pickupRequestId,
             Long senderId
     );
+    // find all messages in the chat that is not sent by "me" and is unread
     List<Message> findByPickupRequest_IdAndSender_IdNotAndReadAtIsNull(
             Long pickupRequestId,
             Long senderId

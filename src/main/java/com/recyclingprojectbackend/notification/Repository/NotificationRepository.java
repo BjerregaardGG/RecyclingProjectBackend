@@ -16,7 +16,6 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUser_IdOrderByCreatedAtDesc(Long userId);
-    long countByUser_IdAndIsReadFalse(long userId);
     @Modifying
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.id = :userId AND n.isRead = false")
     void markAllAsReadForUser(@Param("userId") long userId);
@@ -24,6 +23,4 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Transactional
     void deleteByUser_IdAndTypeAndRelatedId(long userId, NotificationType type, Long relatedId);
-
-    long user(User user);
 }

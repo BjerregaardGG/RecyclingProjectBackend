@@ -10,25 +10,21 @@ import java.time.Instant;
         @UniqueConstraint(columnNames = {"reviewer_id", "pickup_id"})
 })
 public class Review {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @ManyToOne
     @JoinColumn(name = "reviewer_id")
     private User reviewer;
-
     @ManyToOne
     @JoinColumn(name = "reviewed_id")
     private User reviewed;
-
     @ManyToOne
     @JoinColumn(name = "pickup_id")
     private PickupRequest pickup;
-
     @Column(nullable = false)
     private int rating;
-
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 

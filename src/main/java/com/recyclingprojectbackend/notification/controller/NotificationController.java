@@ -29,5 +29,4 @@ public class NotificationController {
         notificationService.markAllAsRead(user.id());
         return ResponseEntity.ok().body("Notifications marked as read");
     }
-
 }

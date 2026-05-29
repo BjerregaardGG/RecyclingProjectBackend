@@ -16,10 +16,8 @@ import java.util.Optional;
 
 @Repository
 public interface PickupRepository extends JpaRepository<PickupRequest, Long> {
-
     List<PickupRequest> findByOwner_IdAndStatusIn(long owner_id, List<PickupStatus> statuses);
     List<PickupRequest> findByRequester_IdAndStatusIn(long requester_id, List<PickupStatus> statuses);
-    PickupRequest findByItemId(long id);
     boolean existsByItem_IdAndRequester_IdAndStatusIn(
             Long itemId, Long requesterId, List<PickupStatus> statuses
     );

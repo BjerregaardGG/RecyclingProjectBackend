@@ -32,7 +32,6 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         this.entityManager = entityManager;
     }
 
-
     @Override
     @Transactional
     public void handleForgotPasswordEmail(String email) {

@@ -15,15 +15,12 @@ public class ItemLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToOne
     @JoinColumn(name = "item_id")
     private Item item;
-
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 

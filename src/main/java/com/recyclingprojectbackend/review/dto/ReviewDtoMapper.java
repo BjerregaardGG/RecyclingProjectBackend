@@ -1,7 +1,6 @@
 package com.recyclingprojectbackend.review.dto;
 
 import com.recyclingprojectbackend.review.model.Review;
-import jakarta.persistence.Entity;
 import org.springframework.stereotype.Component;
 
 @Component

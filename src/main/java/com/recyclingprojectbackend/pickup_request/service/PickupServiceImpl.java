@@ -248,7 +248,6 @@ public class PickupServiceImpl implements PickupService {
     @Override
     @Transactional
     public PickUpRequestDto createPickupRequest(Long itemId, long userId) {
-        System.out.println(">>> createPickupRequest KØRT for item: " + itemId);
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Denne snatch blev ikke fundet"));
@@ -266,7 +265,7 @@ public class PickupServiceImpl implements PickupService {
             );
         }
 
-        boolean alreadyExists = pickupRepository.existsByItem_IdAndRequester_IdAndStatusIn(itemId, userId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED));
+        boolean alreadyExists = pickupRepository.existsByItem_IdAndRequester_IdAndStatusIn (itemId, userId, List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED));
 
         if (alreadyExists) {
             throw new ResponseStatusException(

@@ -18,7 +18,7 @@ public class EmailServiceImpl implements EmailService {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
         mailMessage.setTo(email);
-        mailMessage.setSubject("Wastey - nulstil dit password");
+        mailMessage.setSubject("Snatch - nulstil dit password");
         mailMessage.setText("Klik på linket for at nulstille dit password:\n\n"
                 + "recyclingprojectfrontend://auth/reset-password?token=" + resetToken
                 + "\n\nLinket udløber om 15 minutter.");

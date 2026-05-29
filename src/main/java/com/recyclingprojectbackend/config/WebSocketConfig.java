@@ -32,27 +32,36 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         this.jwtUtility = jwtUtility;
     }
 
+    /**
+     * Configures STOMP message destinations.
+     * "/topic" is used for server-to-client messages,
+     * while "/app" is used for client-to-server messages.
+     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Messages from server
         config.enableSimpleBroker("/topic");
-        // Messages from client
         config.setApplicationDestinationPrefixes("/app");
     }
 
+    /**
+     * Registers the WebSocket endpoint and validates
+     * the JWT token during the handshake.
+     */
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .addInterceptors(new HandshakeInterceptor() {
+
+                    /**
+                     * Validates the JWT token before the WebSocket
+                     * connection is established.
+                     */
                     @Override
                     public boolean beforeHandshake(
                             ServerHttpRequest request,
                             ServerHttpResponse response,
                             WebSocketHandler wsHandler,
                             Map<String, Object> attributes) {
-
-                        System.out.println("==== Handshake start ====");
-                        System.out.println("URI: " + request.getURI());
 
                         String query = request.getURI().getQuery();
                         if (query != null) {
@@ -66,16 +75,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                     try {
                                         Long userId = jwtUtility.extractUserId(token);
                                         attributes.put("userId", userId);
-                                        System.out.println("HANDSHAKE OK for user: " + userId);
                                         return true;
                                     } catch (Exception e) {
-                                        System.out.println("HANDSHAKE FAILED: " + e.getMessage());
                                         return false;
                                     }
                                 }
                             }
                         }
-                        System.out.println("NO TOKEN IN HANDSHAKE - rejecting");
                         return false;
                     }
 
@@ -93,16 +99,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        System.out.println("==== configureClientInboundChannel registered at startup ====");
-
         registration.interceptors(new ChannelInterceptor() {
+
+            /**
+             * Associates the authenticated user with the
+             * WebSocket session during STOMP CONNECT.
+             */
             @Override
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor =
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-
-                System.out.println("==== preSend called ====");
-                System.out.println("Command: " + (accessor != null ? accessor.getCommand() : "null accessor"));
 
                 if (accessor == null) return message;
 
@@ -113,13 +119,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                     if (attributes != null && attributes.get("userId") != null) {
                         Long userId = (Long) attributes.get("userId");
                         accessor.setUser(() -> userId.toString());
-                        System.out.println("USER SET FROM HANDSHAKE: " + userId);
                     } else {
-                        System.out.println("NO USER ID IN SESSION ATTRIBUTES - rejecting");
                         return null;
                     }
                 }
-
                 return message;
             }
         });

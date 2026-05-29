@@ -3,6 +3,7 @@ import java.time.Instant;
 
 public record NotificationDto(
         long id,
+        long userId,
         long otherUserId,
         String type,
         String message,

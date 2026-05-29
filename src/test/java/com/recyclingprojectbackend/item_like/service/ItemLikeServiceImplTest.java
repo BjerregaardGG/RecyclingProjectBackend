@@ -6,6 +6,7 @@ import com.recyclingprojectbackend.item.repository.ItemRepository;
 import com.recyclingprojectbackend.item.util.ItemStatus;
 import com.recyclingprojectbackend.item_like.model.ItemLike;
 import com.recyclingprojectbackend.item_like.repository.ItemLikeRepository;
+import com.recyclingprojectbackend.pickup_request.repository.PickupRepository;
 import com.recyclingprojectbackend.user.model.User;
 import com.recyclingprojectbackend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,8 @@ class ItemLikeServiceImplTest {
     private ItemRepository itemRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private PickupRepository pickupRepository;
 
     private ItemLikeServiceImpl itemLikeService;
     private Item item;
@@ -37,7 +40,7 @@ class ItemLikeServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ItemDtoMapper itemDtoMapper = new ItemDtoMapper(itemLikeRepository);
+        ItemDtoMapper itemDtoMapper = new ItemDtoMapper(itemLikeRepository, pickupRepository);
         itemLikeService = new ItemLikeServiceImpl(
                 itemLikeRepository,
                 itemRepository,

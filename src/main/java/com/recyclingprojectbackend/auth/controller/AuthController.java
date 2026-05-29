@@ -6,7 +6,6 @@ import com.recyclingprojectbackend.auth.dto.RegisterRequestDto;
 import com.recyclingprojectbackend.auth.service.AuthService;
 import com.recyclingprojectbackend.auth.service.AuthServiceImpl;
 import com.recyclingprojectbackend.auth.service.ForgotPasswordService;
-import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -12,15 +12,12 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-
     @ManyToOne
     @JoinColumn(name = "other_user_id")
     private User otherUser;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NotificationType type;
