@@ -27,9 +27,14 @@ jobs:
       - name: Generate JaCoCo report
         run: mvn jacoco:report
 
+      - name: Show coverage summary
+        run: |
+          echo "=== CODE COVERAGE SUMMARY ==="
+          grep -A 3 "Total" target/site/jacoco/index.html || true
+
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
-          path: target/site/jacoco/
+          path: target/site/jacoco//site/jacoco/
