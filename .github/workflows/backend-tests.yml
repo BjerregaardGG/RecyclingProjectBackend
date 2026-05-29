@@ -34,29 +34,6 @@ jobs:
         run: mvn -B clean verify
 
       # ------------------------
-      # Generate JaCoCo report
-      # ------------------------
-      - name: Show coverage summary
-        run: |
-          echo "=============================="
-          echo " CODE COVERAGE SUMMARY "
-          echo "=============================="
-
-          MISSED=$(grep 'type="INSTRUCTION"' target/site/jacoco/jacoco.xml | head -1 | grep -o 'missed="[0-9]*"' | grep -o '[0-9]*')
-          COVERED=$(grep 'type="INSTRUCTION"' target/site/jacoco/jacoco.xml | head -1 | grep -o 'covered="[0-9]*"' | grep -o '[0-9]*')
-
-          TOTAL=$((MISSED + COVERED))
-
-          if [ "$TOTAL" -eq 0 ]; then
-            echo "Coverage: 0%"
-          else
-            PERCENT=$((100 * COVERED / TOTAL))
-            echo "Coverage: $PERCENT%"
-          fi
-
-          echo "=============================="
-
-      # ------------------------
       # Upload HTML report
       # ------------------------
       - name: Upload coverage report
