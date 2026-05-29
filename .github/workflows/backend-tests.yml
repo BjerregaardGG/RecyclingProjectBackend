@@ -11,9 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # ------------------------
+      # Checkout code
+      # ------------------------
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ------------------------
+      # Setup Java
+      # ------------------------
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -21,20 +27,42 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      # ------------------------
+      # Run tests + coverage
+      # ------------------------
       - name: Run tests with coverage
         run: mvn -B clean verify
 
+      # ------------------------
+      # Generate JaCoCo report
+      # ------------------------
       - name: Generate JaCoCo report
         run: mvn jacoco:report
 
+      # ------------------------
+      # Show CLEAN coverage summary
+      # ------------------------
       - name: Show coverage summary
         run: |
-          echo "=== CODE COVERAGE SUMMARY ==="
-          grep -A 3 "Total" target/site/jacoco/index.html || true
+          echo "=============================="
+          echo " CODE COVERAGE SUMMARY "
+          echo "=============================="
 
+          MISSED=$(grep -o 'missed="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
+          COVERED=$(grep -o 'covered="[0-9]*"' target/site/jacoco/jacoco.xml | head -1 | grep -o '[0-9]*')
+
+          TOTAL=$((MISSED + COVERED))
+          PERCENT=$((100 * COVERED / TOTAL))
+
+          echo "Coverage: $PERCENT%"
+          echo "=============================="
+
+      # ------------------------
+      # Upload HTML report
+      # ------------------------
       - name: Upload coverage report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
-          path: target/site/jacoco//site/jacoco/
+          path: target/site/jacoco/

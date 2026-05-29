@@ -104,6 +104,7 @@
 
 	<build>
 		<plugins>
+
 			<!-- Spring Boot plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -117,27 +118,44 @@
 				<version>0.8.12</version>
 
 				<configuration>
+					<!-- ONLY services -->
 					<includes>
-						<include>**/service/**</include>
+						<include>**/service/*</include>
 					</includes>
 				</configuration>
 
 				<executions>
-					<!-- Aktiver coverage agent -->
+
+					<!-- enable coverage agent -->
 					<execution>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
 
-					<!-- Generer HTML report -->
+					<!-- HTML report -->
 					<execution>
-						<id>report</id>
+						<id>html-report</id>
 						<phase>verify</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
 					</execution>
+
+					<!-- XML report (for GitHub Actions parsing) -->
+					<execution>
+						<id>xml-report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+						<configuration>
+							<formats>
+								<format>XML</format>
+							</formats>
+						</configuration>
+					</execution>
+
 				</executions>
 			</plugin>
 
