@@ -2,7 +2,6 @@ package com.recyclingprojectbackend.notification.Repository;
 
 import com.recyclingprojectbackend.notification.model.Notification;
 import com.recyclingprojectbackend.notification.util.NotificationType;
-import com.recyclingprojectbackend.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

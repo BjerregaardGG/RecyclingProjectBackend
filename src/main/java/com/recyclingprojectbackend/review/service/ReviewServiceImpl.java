@@ -49,7 +49,7 @@ public class ReviewServiceImpl implements ReviewService {
         PickupRequest request = pickupRepository.findById(pickupId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kan ikke finde igangværende afhenting"));
 
-        if (request.getStatus() != PickupStatus.COMPLETED) {
+        if (request.getStatus() != PickupStatus.COMPLETED && request.getStatus() != PickupStatus.EXPIRED) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "Du kan kun anmelde efter afhentning er gennemført");
         }
