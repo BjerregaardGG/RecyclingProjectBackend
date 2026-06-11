@@ -1,0 +1,47 @@
+@startuml login-flow
+
+actor User
+participant "LoginScreen" as Screen
+participant "fetchUtils" as Fetch
+participant "AuthController" as Controller
+participant "AuthServiceImpl" as Service
+participant "AuthenticationManager" as AuthMgr
+participant "JwtUtility" as Jwt
+participant "UserRepository" as Repo
+database MySQL
+
+User -> Screen: Indtaster email og password
+Screen -> Fetch: POST /api/auth/login
+Fetch -> Controller: HTTP request
+Controller -> Service: login(LoginRequestDto)
+
+Service -> AuthMgr: authenticate(email, password)
+Service -> Repo: findByEmail(email)
+Repo -> MySQL: SELECT * FROM user WHERE email=?
+MySQL --> Repo: user data
+Repo --> AuthMgr: User
+
+alt Authentication successful
+    AuthMgr --> Service: Authentication
+
+    Service -> Jwt: generateToken(userId)
+    Jwt --> Service: jwtToken
+
+    Service --> Controller: AuthResponseDto(token, email, id)
+    Controller --> Fetch: 200 OK + AuthResponseDto
+    Fetch --> Screen: response
+
+    Screen -> Screen: Gem token i AsyncStorage
+    Screen --> User: Naviger til Home
+
+else Authentication failed
+    AuthMgr --> Service: AuthenticationException
+
+    Service --> Controller: UnauthorizedException
+    Controller --> Fetch: 401 Unauthorized
+    Fetch --> Screen: Error response
+
+    Screen --> User: Vis fejlmeddelelse\n("Forkert email eller password")
+end
+
+@enduml

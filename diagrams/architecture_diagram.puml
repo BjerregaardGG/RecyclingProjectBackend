@@ -1,0 +1,110 @@
+@startuml architecture
+
+title Arkitekturoverblik for Snatch
+
+skinparam componentStyle uml2
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundCorner 8
+
+skinparam package {
+    BackgroundColor #FFFFFF
+    BorderColor #888888
+    FontStyle bold
+}
+
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #555555
+}
+
+skinparam database {
+    BackgroundColor #FFE4E1
+    BorderColor #B22222
+}
+
+skinparam cloud {
+    BackgroundColor #FFF8DC
+    BorderColor #DAA520
+}
+
+' ============================================================
+' FRONTEND
+' ============================================================
+package "Frontend (React Native + Expo)" #E6F2FF {
+
+    [Skærme / UI\n(app/)] as UI
+
+    [NotificationContext\n(React Context)] as Context
+
+    [fetchUtils\n(HTTP wrapper med JWT)] as Fetch
+
+    [useChat hook\n(WebSocket-klient)] as WSHook
+
+    [AsyncStorage\n(JWT-token)] as Storage
+
+    UI --> Fetch : authenticated requests
+    UI --> Context : læser unread count
+    UI --> WSHook : chat-funktionalitet
+    UI --> Storage : gemmer/læser token
+    Context --> Fetch : polling /api/notifications/me
+    Fetch --> Storage : henter token til Authorization-header
+}
+
+' ============================================================
+' INTERNET LAG
+' ============================================================
+cloud "Internet" #FFF8DC {
+    [ngrok-tunnel] as Ngrok
+}
+
+' ============================================================
+' BACKEND
+' ============================================================
+package "Backend (Spring Boot)" #E6FFE6 {
+
+    [JwtFilter\n(Spring Security)] as Filter
+
+    [Controllers\n@RestController] as Controllers
+
+    [Services\n(forretningslogik)] as Services
+
+    [Repositories\n(Spring Data JPA)] as Repos
+
+    [GlobalExceptionHandler\n@RestControllerAdvice] as Exception
+
+    [WebSocketController\n@MessageMapping] as WSController
+
+    [NotificationService\n(cross-cutting)] as NotifService
+
+    Filter --> Controllers : autoriseret request
+    Controllers --> Services : delegerer
+    Services --> Repos : data-adgang
+    Services --> NotifService : opretter notifikationer
+    Services ..> Exception : kaster ResponseStatusException
+    Exception ..> Controllers : JSON-fejlresponse
+    WSController --> Services : process besked
+}
+
+' ============================================================
+' EKSTERNE TJENESTER
+' ============================================================
+database "MySQL" as DB
+
+cloud "Cloudinary\n(billed-host)" as Cloud #FFE4E1
+
+cloud "SMTP-server\n(email)" as SMTP #FFE4E1
+
+' ============================================================
+' FORBINDELSER MELLEM ZONER
+' ============================================================
+Fetch --> Ngrok : HTTPS + Bearer JWT
+WSHook --> Ngrok : WebSocket + STOMP\n+ token i query
+Ngrok --> Filter : forward HTTPS
+Ngrok --> WSController : forward WebSocket
+
+Repos --> DB : JPA / Hibernate
+UI ..> Cloud : direkte upload af billeder
+Services ..> SMTP : reset-password mail
+
+@enduml
