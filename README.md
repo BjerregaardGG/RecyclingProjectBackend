@@ -233,8 +233,6 @@ Eksempler på test-strategier brugt i projektet:
 
 - **ArgumentCaptor** til at verificere objekter der bygges inde i servicen
 - **`verify(repo, never()).save(any())`** til at sikre at fejl-paths ikke gemmer data
-- **`thenAnswer`** til at simulere database-id-tildeling ved save
-- **`InOrder`** til at verificere rækkefølge af kald (fx slet → flush → save)
 
 ## CI/CD
 
