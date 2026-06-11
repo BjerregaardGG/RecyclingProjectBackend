@@ -1,7 +1,6 @@
 package com.recyclingprojectbackend.item.repository;
 
-import com.recyclingprojectbackend.category.model.Category;
-import com.recyclingprojectbackend.item.dto.ItemDto;
+
 import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.util.ItemStatus;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,5 @@
 package com.recyclingprojectbackend.auth.utility;
 
-import com.recyclingprojectbackend.auth.model.PasswordResetToken;
 import com.recyclingprojectbackend.auth.repository.PasswordResetTokenRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.scheduling.annotation.Scheduled;

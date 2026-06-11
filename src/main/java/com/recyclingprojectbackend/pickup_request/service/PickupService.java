@@ -1,10 +1,7 @@
 package com.recyclingprojectbackend.pickup_request.service;
 
-import com.recyclingprojectbackend.message.dto.ConversationDto;
 import com.recyclingprojectbackend.pickup_request.dto.PickUpRequestDto;
-import com.recyclingprojectbackend.pickup_request.model.PickupRequest;
 import com.recyclingprojectbackend.pickup_request.util.PickupStatus;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

@@ -46,9 +46,4 @@ public class AuthController {
         forgotPasswordService.resetPassword(token, password);
         return ResponseEntity.ok("Password has reset successfully");
     }
-
-    @GetMapping("/test")
-    public String test() {
-        return "test";
-    }
 }

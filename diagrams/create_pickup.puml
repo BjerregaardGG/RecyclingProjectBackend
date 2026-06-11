@@ -1,0 +1,113 @@
+@startuml create-pickup-request-flow
+
+title Opret pickup-anmodning ("Snatch it")
+
+actor "Bruger" as User
+participant "ItemScreen" as Screen
+participant "fetchUtils" as Fetch
+participant "JwtFilter" as Filter
+participant "PickupController" as Controller
+participant "PickupServiceImpl" as Service
+participant "ItemRepository" as ItemRepo
+participant "UserRepository" as UserRepo
+participant "PickupRepository" as PickupRepo
+participant "NotificationServiceImpl" as Notif
+participant "PickupRequestDtoMapper" as Mapper
+database MySQL
+
+User -> Screen: Trykker "Snatch it"
+Screen -> Fetch: POST /api/pickups/items/{itemId}
+Fetch -> Filter: HTTPS + Bearer JWT
+
+activate Filter
+Filter -> Filter: validateToken(jwt)
+Filter -> Filter: extractUserId(token)
+Filter -> Filter: setAuthentication(user)
+deactivate Filter
+
+Filter -> Controller: forward request
+activate Controller
+
+Controller -> Service: createPickupRequest(itemId, userId)
+activate Service
+
+Service -> ItemRepo: findById(itemId)
+ItemRepo -> MySQL: SELECT * FROM item WHERE id=?
+MySQL --> ItemRepo: item data
+ItemRepo --> Service: Optional<Item>
+
+alt item ikke fundet
+    Service --> Controller: ResponseStatusException(404)
+    Controller --> Fetch: 404 Not Found
+    Fetch --> Screen: errorData.message
+    Screen --> User: "Denne snatch blev ikke fundet"
+end
+
+Service -> UserRepo: findById(userId)
+UserRepo -> MySQL: SELECT * FROM user WHERE id=?
+MySQL --> UserRepo: user data
+UserRepo --> Service: Optional<User>
+
+note right of Service
+    Tre forretningsregler tjekkes:
+    1. Item skal være AVAILABLE
+    2. Brugeren må ikke eje item'et
+    3. Brugeren har ikke allerede
+       en aktiv anmodning
+end note
+
+alt item.status != AVAILABLE
+    Service --> Controller: ResponseStatusException(409)
+    Controller --> Fetch: 409 Conflict
+    Screen --> User: "Denne snatch er ikke længere tilgængelig"
+end
+
+alt brugeren er ejeren
+    Service --> Controller: ResponseStatusException(409)
+    Controller --> Fetch: 409 Conflict
+    Screen --> User: "Du kan ikke anmode om din egen snatch"
+end
+
+Service -> PickupRepo: existsByItemAndRequesterAndStatusIn(\nitemId, userId, [PENDING, ACCEPTED])
+PickupRepo -> MySQL: SELECT COUNT(*) FROM pickup_requests
+MySQL --> PickupRepo: count
+PickupRepo --> Service: boolean
+
+alt alreadyExists == true
+    Service --> Controller: ResponseStatusException(409)
+    Controller --> Fetch: 409 Conflict
+    Screen --> User: "Du har allerede en aktiv anmodning"
+end
+
+Service -> Service: new PickupRequest()
+note right of Service
+    Sætter: requester, item,
+    status=PENDING, createdAt,
+    owner = item.getUser()
+end note
+
+Service -> PickupRepo: save(pickupRequest)
+PickupRepo -> MySQL: INSERT INTO pickup_requests
+MySQL --> PickupRepo: savedRequest med id
+PickupRepo --> Service: PickupRequest
+
+Service -> Notif: createNotification(\nownerId, requesterId,\nPICKUP_REQUEST, message, pickupId)
+activate Notif
+Notif -> MySQL: INSERT INTO notification
+Notif --> Service: void
+deactivate Notif
+
+Service -> Mapper: pickupRequestToPickupRequestDto(request)
+Mapper --> Service: PickUpRequestDto
+
+Service --> Controller: PickUpRequestDto
+deactivate Service
+
+Controller --> Fetch: 201 Created + DTO
+deactivate Controller
+
+Fetch --> Screen: response
+Screen -> Screen: setItem(prev => {...prev,\nhasActiveRequest: true})
+Screen --> User: vis "Du er i kø"
+
+@enduml

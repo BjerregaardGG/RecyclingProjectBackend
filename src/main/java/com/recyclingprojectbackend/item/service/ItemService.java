@@ -1,12 +1,8 @@
 package com.recyclingprojectbackend.item.service;
 
-import com.recyclingprojectbackend.category.model.Category;
 import com.recyclingprojectbackend.item.dto.ItemDto;
 import com.recyclingprojectbackend.item.dto.ItemRequestDto;
-import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item.util.ItemStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 

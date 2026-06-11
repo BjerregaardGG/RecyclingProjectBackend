@@ -1,6 +1,5 @@
 package com.recyclingprojectbackend.item_like.repository;
 
-import com.recyclingprojectbackend.item.model.Item;
 import com.recyclingprojectbackend.item_like.model.ItemLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

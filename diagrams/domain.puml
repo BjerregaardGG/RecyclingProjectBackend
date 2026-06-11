@@ -1,0 +1,110 @@
+@startuml domain-model
+
+title Domænemodel for Snatch
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam roundCorner 8
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #555555
+    FontStyle bold
+    AttributeFontSize 12
+}
+
+' ============================================================
+' KERNE-ENTITETER
+' ============================================================
+
+class User {
+    name
+    email
+    city
+    postalCode
+    profileText
+    image
+}
+
+class Item {
+    name
+    description
+    secondTitle
+    image
+    address
+    city
+    latitude
+    longitude
+    status
+    reservedAt
+}
+
+class Category {
+    categoryName
+}
+
+class PickupRequest {
+    status
+    createdAt
+    acceptedAt
+    expiresAt
+    ownerConfirmedAt
+    requesterConfirmedAt
+    completedAt
+}
+
+class Message {
+    content
+    sentAt
+    readAt
+}
+
+class Review {
+    rating
+    comment
+    createdAt
+}
+
+class ItemLike {
+    createdAt
+}
+
+class Notification {
+    type
+    message
+    isRead
+    createdAt
+}
+
+' ============================================================
+' RELATIONER
+' ============================================================
+
+' En bruger ejer mange items
+User "1" --> "*" Item : ejer
+
+' Et item tilhører én kategori
+Item "*" --> "1" Category : tilhører
+
+' Pickup-requests med to roller
+User "1" --> "*" PickupRequest : modtager (som ejer)
+User "1" --> "*" PickupRequest : sender (som anmoder)
+Item "1" --> "*" PickupRequest : er anmodet
+
+' Chat-beskeder hører til en pickup
+PickupRequest "1" --> "*" Message : indeholder
+User "1" --> "*" Message : sender
+
+' Anmeldelser efter afhentning
+PickupRequest "1" --> "0..2" Review : giver anledning til
+User "1" --> "*" Review : skriver (som anmelder)
+User "1" --> "*" Review : modtager (som anmeldt)
+
+' Likes (modelleret som join-entitet)
+User "1" --> "*" ItemLike : laver
+Item "1" --> "*" ItemLike : modtager
+
+' Notifikationer
+User "1" --> "*" Notification : modtager
+
+@enduml
