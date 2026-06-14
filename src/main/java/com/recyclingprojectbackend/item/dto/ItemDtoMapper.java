@@ -28,6 +28,9 @@ public class ItemDtoMapper {
                         List.of(PickupStatus.PENDING, PickupStatus.ACCEPTED)
                 );
 
+        long activeRequestCount = pickupRepository
+                .countByItem_IdAndStatus(item.getId(), PickupStatus.PENDING);
+
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -42,7 +45,8 @@ public class ItemDtoMapper {
                 item.getReservedAt(),
                 itemLikeRepository.countByItem_Id(item.getId()),
                 itemLikeRepository.existsByUser_IdAndItem_Id(currentUserId, item.getId()),
-                hasActiveRequest
+                hasActiveRequest,
+                activeRequestCount
         );
     }
 }

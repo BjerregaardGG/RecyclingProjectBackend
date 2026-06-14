@@ -19,5 +19,6 @@ public record ItemDto(
     LocalDateTime reservedAt,
     long likeCount,
     boolean isLikedByCurrentUser,
-    boolean hasActiveRequest
+    boolean hasActiveRequest,
+    long activeRequestCount
 ){}

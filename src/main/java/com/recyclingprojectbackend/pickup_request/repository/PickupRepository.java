@@ -38,4 +38,6 @@ public interface PickupRepository extends JpaRepository<PickupRequest, Long> {
     @Modifying
     @Transactional
     void deleteAllByItem_Id(long itemId);
+    long countByItem_IdAndStatus(long itemId, PickupStatus status);
+
 }
